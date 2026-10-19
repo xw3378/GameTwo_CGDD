@@ -365,7 +365,6 @@ internal class NbPlayer : MonoBehaviour
         if (moveInput)
         {
             _idleT = 0f;
-            AudioManager.StopSound();
         }
         else
         {
