@@ -100,6 +100,7 @@ internal class NbPlayer : MonoBehaviour
     float _movedTotal;
     bool _loggedMove;
     bool _loggedStuck;
+    float _idleT;                           // 距上次"移动输入"的秒数（满 3 秒吱一声）
     Vector3 _spawn;                         // 出生点（贴地之后的真实值），掉出世界时回这里
 
     // ───────────────────────── 出生 ─────────────────────────
@@ -356,6 +357,25 @@ internal class NbPlayer : MonoBehaviour
             }
         }
         else _stuckT = 0f;
+
+        // ── 闲置吱吱叫 ──
+        // 只认**移动输入**（WASD / 方向键 / 跳）：站着转头、Shift、Q/E 都不算。
+        // 满 3 秒吱一声，之后每满 3 秒再吱；一旦重新移动，立刻停。
+        bool moveInput = h != 0f || v != 0f || (kb != null && kb.spaceKey.wasPressedThisFrame);
+        if (moveInput)
+        {
+            _idleT = 0f;
+            AudioManager.StopSound();
+        }
+        else
+        {
+            _idleT += raw;
+            if (_idleT >= 3f)
+            {
+                _idleT = 0f;
+                AudioManager.PlaySqueak();
+            }
+        }
     }
 
     string Blockers()

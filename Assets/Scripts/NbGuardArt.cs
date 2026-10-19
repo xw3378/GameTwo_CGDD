@@ -61,14 +61,14 @@ internal static class NbGuardArt
         Color grip = new Color(0.055f, 0.055f, 0.062f);
 
         // Unity 原始圆柱的轴是 Y，所以要绕 X 转 90° 才对着灯节点的 +Z（= 照射方向）。
-        GameObject h = Nb.Cyl(lamp, "Torch Grip", new Vector3(0f, 0f, -0.09f), 0.052f, 0.18f, grip);
+        GameObject h = Nb.Cyl(lamp, "Torch Grip", new Vector3(0f, 0f, -0.09f), 0.052f, 0.18f, grip, false);
         h.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
 
-        GameObject head = Nb.Cyl(lamp, "Torch Head", new Vector3(0f, 0f, 0.025f), 0.084f, 0.07f, body);
+        GameObject head = Nb.Cyl(lamp, "Torch Head", new Vector3(0f, 0f, 0.025f), 0.084f, 0.07f, body, false);
         head.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
 
         GameObject lens = Nb.Ball(lamp, "Torch Lens", new Vector3(0f, 0f, 0.062f), 0.072f,
-            new Color(1f, 0.95f, 0.80f));
+            new Color(1f, 0.95f, 0.80f), false);
         Renderer lr = lens.GetComponent<Renderer>();
         if (lr != null) lr.sharedMaterial = Nb.MatEmissive(new Color(1f, 0.94f, 0.78f), 3.4f);
 

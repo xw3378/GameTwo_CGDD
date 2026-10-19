@@ -120,16 +120,16 @@ public static class NbBuilder
         if (z1 - z0 >= x1 - x0)
         {
             Nb.Box(p, name + " Curb A", new Vector3((x0 + x1) * 0.5f, top + 0.004f, z0 + 0.09f),
-                new Vector3(x1 - x0, 0.03f, 0.18f), PaveDark);
+                new Vector3(x1 - x0, 0.03f, 0.18f), PaveDark, false);
             Nb.Box(p, name + " Curb B", new Vector3((x0 + x1) * 0.5f, top + 0.004f, z1 - 0.09f),
-                new Vector3(x1 - x0, 0.03f, 0.18f), PaveDark);
+                new Vector3(x1 - x0, 0.03f, 0.18f), PaveDark, false);
         }
         else
         {
             Nb.Box(p, name + " Curb A", new Vector3(x0 + 0.09f, top + 0.004f, (z0 + z1) * 0.5f),
-                new Vector3(0.18f, 0.03f, z1 - z0), PaveDark);
+                new Vector3(0.18f, 0.03f, z1 - z0), PaveDark, false);
             Nb.Box(p, name + " Curb B", new Vector3(x1 - 0.09f, top + 0.004f, (z0 + z1) * 0.5f),
-                new Vector3(0.18f, 0.03f, z1 - z0), PaveDark);
+                new Vector3(0.18f, 0.03f, z1 - z0), PaveDark, false);
         }
     }
 
@@ -139,7 +139,7 @@ public static class NbBuilder
     // 如果路面是一个纯色平面，走起来画面上没有任何东西在动 —— 这正是之前几轮
     // "看着像卡住"的根源。所以沿过道撒一层**贴地的参照物**：石子、裂纹、落叶、井盖。
     //
-    // 全部是无碰撞的装饰（Nb.Box 默认 solid=false ⇒ 删碰撞体 + Ignore Raycast 层）：
+    // 全部是无碰撞的装饰（显式传 solid=false ⇒ 删碰撞体 + Ignore Raycast 层）：
     // 不挡人、不挡猫的视线、也不参与地面探测（TryGroundY 只打 DefaultRaycastLayers）。
     // 位置用固定种子的线性同余生成，**每次搭出来的都一样** —— 否则每局地形细节都在变，
     // 烘焙进场景和运行时生成的两份也会对不上。
@@ -186,7 +186,7 @@ public static class NbBuilder
                     // 石子：压扁的小方块，贴地 4~7 cm
                     float w = 0.05f + 0.055f * Rnd(ref seed);
                     GameObject g = Nb.Box(p, "Pebble " + n, new Vector3(x, top + 0.012f, z),
-                        new Vector3(w, 0.045f, w * 1.15f), PebbleCol);
+                        new Vector3(w, 0.045f, w * 1.15f), PebbleCol, false);
                     g.transform.localRotation = Quaternion.Euler(0f, yaw, 0f);
                 }
                 else if (pick < 0.78f)
@@ -194,14 +194,14 @@ public static class NbBuilder
                     // 裂纹：细长的深色条，0.4~1.3 m
                     float len = 0.4f + 0.9f * Rnd(ref seed);
                     GameObject g = Nb.Box(p, "Crack " + n, new Vector3(x, top + 0.004f, z),
-                        new Vector3(0.035f, 0.006f, len), CrackCol);
+                        new Vector3(0.035f, 0.006f, len), CrackCol, false);
                     g.transform.localRotation = Quaternion.Euler(0f, yaw, 0f);
                 }
                 else
                 {
                     // 落叶
                     GameObject g = Nb.Box(p, "Leaf " + n, new Vector3(x, top + 0.009f, z),
-                        new Vector3(0.10f, 0.006f, 0.07f), Rnd(ref seed) < 0.5f ? LeafA2 : LeafB2);
+                        new Vector3(0.10f, 0.006f, 0.07f), Rnd(ref seed) < 0.5f ? LeafA2 : LeafB2, false);
                     g.transform.localRotation = Quaternion.Euler(0f, yaw, 0f);
                 }
                 n++;
@@ -223,9 +223,9 @@ public static class NbBuilder
             float gx = grates[i, 0], gz = grates[i, 1];
             float top = (Mathf.Abs(gx - Nb.VAcx) < 3f || Mathf.Abs(gx - Nb.VBcx) < 3f) ? 0.048f : 0.044f;
             Nb.Box(p, "Grate " + i, new Vector3(gx, top + 0.007f, gz),
-                new Vector3(0.56f, 0.014f, 0.56f), Iron);
+                new Vector3(0.56f, 0.014f, 0.56f), Iron, false);
             Nb.Box(p, "Grate Rim " + i, new Vector3(gx, top + 0.004f, gz),
-                new Vector3(0.68f, 0.008f, 0.68f), new Color(0.30f, 0.29f, 0.27f));
+                new Vector3(0.68f, 0.008f, 0.68f), new Color(0.30f, 0.29f, 0.27f), false);
         }
 
         Debug.LogFormat("[Nb] 地面细节：{0} 个石子/裂纹/落叶 + {1} 个井盖（全部无碰撞、Ignore Raycast 层）。",
@@ -263,10 +263,10 @@ public static class NbBuilder
         float px0 = Nb.GateX0 - 0.35f, px1 = Nb.GateX1 + 0.35f;
         Nb.Box(p, "Gate Post W", new Vector3(px0, 1.6f, zc), new Vector3(0.7f, 3.2f, 0.9f), WallCol, true);
         Nb.Box(p, "Gate Post E", new Vector3(px1, 1.6f, zc), new Vector3(0.7f, 3.2f, 0.9f), WallCol, true);
-        Nb.Box(p, "Gate Post W Cap", new Vector3(px0, 3.28f, zc), new Vector3(0.92f, 0.16f, 1.1f), WallCap);
-        Nb.Box(p, "Gate Post E Cap", new Vector3(px1, 3.28f, zc), new Vector3(0.92f, 0.16f, 1.1f), WallCap);
+        Nb.Box(p, "Gate Post W Cap", new Vector3(px0, 3.28f, zc), new Vector3(0.92f, 0.16f, 1.1f), WallCap, false);
+        Nb.Box(p, "Gate Post E Cap", new Vector3(px1, 3.28f, zc), new Vector3(0.92f, 0.16f, 1.1f), WallCap, false);
         Nb.Box(p, "Gate Lintel", new Vector3((px0 + px1) * 0.5f, 3.05f, zc),
-            new Vector3(px1 - px0 + 0.7f, 0.34f, 0.5f), WallCol);
+            new Vector3(px1 - px0 + 0.7f, 0.34f, 0.5f), WallCol, false);
     }
 
     static void Wall(Transform p, string name, Vector3 center, Vector3 size)
@@ -274,7 +274,7 @@ public static class NbBuilder
         Nb.Box(p, name, center, size, WallCol, true);
         // 压顶：比墙体宽 8 cm，像真围墙的水泥帽
         Nb.Box(p, name + " Cap", new Vector3(center.x, size.y + 0.07f, center.z),
-            new Vector3(size.x + 0.08f, 0.14f, size.z + 0.08f), WallCap);
+            new Vector3(size.x + 0.08f, 0.14f, size.z + 0.08f), WallCap, false);
     }
 
     // ───────────────────────── 路灯 ─────────────────────────
@@ -296,12 +296,12 @@ public static class NbBuilder
         root.SetParent(p, false);
         root.localPosition = at;
 
-        Nb.Cyl(root, "Pole", new Vector3(0f, 1.7f, 0f), 0.14f, 3.4f, Iron);
-        Nb.Box(root, "Arm", new Vector3(side * 0.45f, 3.32f, 0f), new Vector3(0.9f, 0.1f, 0.1f), Iron);
-        Nb.Box(root, "Head", new Vector3(side * 0.9f, 3.2f, 0f), new Vector3(0.42f, 0.16f, 0.26f), Iron);
+        Nb.Cyl(root, "Pole", new Vector3(0f, 1.7f, 0f), 0.14f, 3.4f, Iron, false);
+        Nb.Box(root, "Arm", new Vector3(side * 0.45f, 3.32f, 0f), new Vector3(0.9f, 0.1f, 0.1f), Iron, false);
+        Nb.Box(root, "Head", new Vector3(side * 0.9f, 3.2f, 0f), new Vector3(0.42f, 0.16f, 0.26f), Iron, false);
         // 灯罩玻璃要自发光：夜里布光是暗的，靠材质自己亮才看得出"灯是开的"
         GameObject glass = Nb.Box(root, "Glass", new Vector3(side * 0.9f, 3.11f, 0f),
-            new Vector3(0.32f, 0.06f, 0.18f), LampWarm);
+            new Vector3(0.32f, 0.06f, 0.18f), LampWarm, false);
         Renderer gr = glass.GetComponent<Renderer>();
         if (gr != null) gr.sharedMaterial = Nb.MatEmissive(LampWarm, 2.4f);
     }
@@ -335,9 +335,9 @@ public static class NbBuilder
         root.localPosition = at;
 
         Nb.Cyl(root, "Trunk", new Vector3(0f, 1.3f * k, 0f), 0.34f * k, 2.6f * k, Trunk);
-        Nb.Ball(root, "Crown A", new Vector3(0f, 3.5f * k, 0f), 3.1f * k, (seed & 1) == 0 ? LeafA : LeafB);
+        Nb.Ball(root, "Crown A", new Vector3(0f, 3.5f * k, 0f), 3.1f * k, (seed & 1) == 0 ? LeafA : LeafB, false);
         Nb.Ball(root, "Crown B", new Vector3(0.5f * ((seed % 3) - 1), 4.35f * k, 0.4f * ((seed % 4) - 1.5f)),
-            2.05f * k, (seed & 1) == 0 ? LeafB : LeafA);
+            2.05f * k, (seed & 1) == 0 ? LeafB : LeafA, false);
     }
 
     // ───────────────────────── 垃圾桶 / 花坛 ─────────────────────────
@@ -374,9 +374,9 @@ public static class NbBuilder
             root.SetParent(p, false);
             root.localPosition = planters[i];
             Nb.Box(root, "Box", new Vector3(0f, 0.28f, 0f), new Vector3(1.5f, 0.56f, 0.8f), WallCap);
-            Nb.Box(root, "Soil", new Vector3(0f, 0.57f, 0f), new Vector3(1.3f, 0.06f, 0.62f), new Color(0.24f, 0.18f, 0.13f));
+            Nb.Box(root, "Soil", new Vector3(0f, 0.57f, 0f), new Vector3(1.3f, 0.06f, 0.62f), new Color(0.24f, 0.18f, 0.13f), false);
             for (int b = 0; b < 3; b++)
-                Nb.Ball(root, "Bush " + b, new Vector3(-0.42f + b * 0.42f, 0.74f, 0f), 0.62f, LeafB);
+                Nb.Ball(root, "Bush " + b, new Vector3(-0.42f + b * 0.42f, 0.74f, 0f), 0.62f, LeafB, false);
         }
     }
 }

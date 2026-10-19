@@ -245,7 +245,7 @@ internal static class NbFridge
         {
             float x = XMin + 2.6f + i * 2.5f;
             Nb.Box(p, "Rib " + i, new Vector3(x, CeilY * 0.5f, ZMin + WallT + 0.02f),
-                new Vector3(0.16f, CeilY - 0.5f, 0.04f), ShellCol);
+                new Vector3(0.16f, CeilY - 0.5f, 0.04f), ShellCol, false);
         }
     }
 
@@ -271,15 +271,15 @@ internal static class NbFridge
             float wl = StairX0 - (XMin + WallT);
             if (wl > 0.2f)
                 Nb.Box(p, "Shelf Lip L" + n + " W", new Vector3(XMin + WallT + wl * 0.5f, y + 0.018f, front - 0.05f),
-                    new Vector3(wl, 0.036f, 0.10f), ShelfE);
+                    new Vector3(wl, 0.036f, 0.10f), ShelfE, false);
             float wr = (XMax - WallT) - StairX1;
             if (wr > 0.2f)
                 Nb.Box(p, "Shelf Lip L" + n + " E", new Vector3(StairX1 + wr * 0.5f, y + 0.018f, front - 0.05f),
-                    new Vector3(wr, 0.036f, 0.10f), ShelfE);
+                    new Vector3(wr, 0.036f, 0.10f), ShelfE, false);
 
             // 板下的一根加强筋：低头看这块板时，它给出"我在板下面"的明确证据
             Nb.Box(p, "Shelf Rib L" + n, new Vector3(CX, y - Slab - 0.03f, z0 + depth * 0.5f),
-                new Vector3(XMax - XMin - WallT * 2.6f, 0.05f, 0.22f), ShelfE);
+                new Vector3(XMax - XMin - WallT * 2.6f, 0.05f, 0.22f), ShelfE, false);
         }
 
         Stairs(p);
@@ -290,7 +290,7 @@ internal static class NbFridge
         {
             float y = Top(n) - 0.09f;
             Nb.Box(p, "Fridge Lamp L" + n, new Vector3(CX, y, FlatFrontZ(n) - 0.90f),
-                new Vector3(XMax - XMin - WallT * 2f - 1.5f, 0.05f, 0.16f), Lamp);
+                new Vector3(XMax - XMin - WallT * 2f - 1.5f, 0.05f, 0.16f), Lamp, false);
         }
     }
 
@@ -325,7 +325,7 @@ internal static class NbFridge
                 // 没有它，六层灰板在冷光下会糊成一堵墙。
                 Nb.Box(p, "Step Edge L" + (n + 1) + "." + k,
                     new Vector3((StairX0 + StairX1) * 0.5f, top + 0.006f, z0 + StepRun - 0.045f),
-                    new Vector3(w, 0.012f, 0.09f), StepEdge);
+                    new Vector3(w, 0.012f, 0.09f), StepEdge, false);
             }
         }
     }
@@ -388,26 +388,26 @@ internal static class NbFridge
                         new Vector3(x + (i - 1) * 0.52f, y + 0.24f, z),
                         new Vector3(0.46f, 0.48f, 0.42f), Carton, true);
                 Nb.Box(p, n + " band", new Vector3(x, y + 0.10f, z + 0.215f),
-                    new Vector3(1.60f, 0.10f, 0.02f), CartonB);
+                    new Vector3(1.60f, 0.10f, 0.02f), CartonB, false);
                 break;
 
             case 1:   // 西瓜：圆的，绕过去要跑半圈 —— 是四样里最好用的
                 Nb.Ball(p, n + " melon", new Vector3(x, y + 0.24f, z), 0.50f, Melon, true);
-                Nb.Ball(p, n + " stripe", new Vector3(x, y + 0.24f, z), 0.515f, MelonL);
+                Nb.Ball(p, n + " stripe", new Vector3(x, y + 0.24f, z), 0.515f, MelonL, false);
                 break;
 
             case 2:   // 面包箱：长条，能一次挡住两个人宽的光
                 Nb.Box(p, n + " box", new Vector3(x, y + 0.22f, z),
                     new Vector3(1.35f, 0.44f, 0.55f), Bread, true);
                 Nb.Box(p, n + " lid", new Vector3(x, y + 0.45f, z),
-                    new Vector3(1.42f, 0.05f, 0.60f), new Color(0.30f, 0.19f, 0.09f));
+                    new Vector3(1.42f, 0.05f, 0.60f), new Color(0.30f, 0.19f, 0.09f), false);
                 break;
 
             default:  // 黄油块：低一些（0.40），但宽
                 Nb.Box(p, n + " butter", new Vector3(x, y + 0.20f, z),
                     new Vector3(1.10f, 0.40f, 0.80f), Butter, true);
                 Nb.Box(p, n + " wrap", new Vector3(x, y + 0.405f, z),
-                    new Vector3(1.14f, 0.02f, 0.84f), new Color(0.70f, 0.64f, 0.36f));
+                    new Vector3(1.14f, 0.02f, 0.84f), new Color(0.70f, 0.64f, 0.36f), false);
                 break;
         }
     }
@@ -427,22 +427,22 @@ internal static class NbFridge
         Nb.Box(hinge.transform, "Door Panel", new Vector3(w * 0.5f, CeilY * 0.5f, 0f),
             new Vector3(w, CeilY, 0.14f), DoorCol, true);
         Nb.Box(hinge.transform, "Door Inner", new Vector3(w * 0.5f, CeilY * 0.5f, -0.09f),
-            new Vector3(w - 0.30f, CeilY - 0.30f, 0.04f), DoorIn);
+            new Vector3(w - 0.30f, CeilY - 0.30f, 0.04f), DoorIn, false);
         // 门内侧的两道横档（搁物架）：冰箱门的经典结构，也给"门开着"多一个可读的形状
         for (int i = 0; i < 2; i++)
         {
             float y = 1.10f + i * 1.30f;
             Nb.Box(hinge.transform, "Door Shelf " + i, new Vector3(w * 0.5f, y, -0.24f),
-                new Vector3(w - 0.50f, 0.06f, 0.30f), DoorIn);
+                new Vector3(w - 0.50f, 0.06f, 0.30f), DoorIn, false);
             Nb.Box(hinge.transform, "Door Shelf Lip " + i, new Vector3(w * 0.5f, y + 0.09f, -0.38f),
-                new Vector3(w - 0.50f, 0.12f, 0.04f), DoorCol);
+                new Vector3(w - 0.50f, 0.12f, 0.04f), DoorCol, false);
         }
 
         // 关门时门口那一圈密封条：玩家低头能看见自己站在门内侧
         Nb.Box(p, "Fridge Gasket W", new Vector3(XMin + WallT * 0.5f, CeilY * 0.5f, ZMax - 0.16f),
-            new Vector3(WallT, CeilY, 0.08f), Trim);
+            new Vector3(WallT, CeilY, 0.08f), Trim, false);
         Nb.Box(p, "Fridge Gasket E", new Vector3(XMax - WallT * 0.5f, CeilY * 0.5f, ZMax - 0.16f),
-            new Vector3(WallT, CeilY, 0.08f), Trim);
+            new Vector3(WallT, CeilY, 0.08f), Trim, false);
     }
 
     /// 门外：一小块地面 + 三面墙。

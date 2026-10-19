@@ -129,6 +129,7 @@ internal class NbGuard : MonoBehaviour
 
     internal bool Sees { get; private set; }
     internal bool Chasing { get { return _chasing; } }
+    internal float _nextSound = -1;
 
     internal Vector3 Eye { get { return _lamp != null ? _lamp.position : transform.position; } }
 
@@ -156,9 +157,9 @@ internal class NbGuard : MonoBehaviour
             Color skin = new Color(0.38f, 0.30f, 0.24f);
             Color cap  = new Color(0.07f, 0.08f, 0.10f);
 
-            Nb.Cyl(go.transform, "Coat", new Vector3(0f, 0.86f, 0f), 0.60f, 1.72f, coat);
-            Nb.Ball(go.transform, "Head", new Vector3(0f, 1.80f, 0f), 0.44f, skin);
-            Nb.Box(go.transform, "Cap", new Vector3(0f, 2.02f, 0f), new Vector3(0.52f, 0.10f, 0.52f), cap);
+            Nb.Cyl(go.transform, "Coat", new Vector3(0f, 0.86f, 0f), 0.60f, 1.72f, coat, false);
+            Nb.Ball(go.transform, "Head", new Vector3(0f, 1.80f, 0f), 0.44f, skin, false);
+            Nb.Box(go.transform, "Cap", new Vector3(0f, 2.02f, 0f), new Vector3(0.52f, 0.10f, 0.52f), cap, false);
         }
 
         // 手电：一个**实体**（握把 + 灯头 + 会发光的镜片 + 一小盏点光），挂在灯泡节点下。
@@ -231,7 +232,12 @@ internal class NbGuard : MonoBehaviour
         Sense();
         Think();
 
-        if (_chasing) Chase();
+        if (_chasing)
+        {
+            // 跑步的脚步声由 AudioManager 按距离播放（见 AudioManager 的脚步系统），
+            // 这里不再单独放一次性音效，否则会和它叠在一起。
+            Chase();
+        }
         else if (_pause > 0f) LookAround();
         else Walk();
 
@@ -502,7 +508,7 @@ internal class NbGuard : MonoBehaviour
         else
             _scanYawWant = Random.Range(-55f, 55f);
 
-        _scanPitchWant = Random.Range(-24f, 6f);
+        _scanPitchWant = Random.Range(-6f, 24f);
         _holdT = alert ? Random.Range(0.28f, 0.75f) : Random.Range(0.6f, 1.6f);
     }
 
@@ -599,10 +605,19 @@ internal class NbGuard : MonoBehaviour
 
         Debug.LogFormat("[Guard] 手电扫到玩家（{0:F1} m），开始追击：{1:F2} m/s。",
             _player != null ? Nb.FlatDist(transform.position, _player.position) : -1f, ChaseSpeed);
+
+        if ( _nextSound <= Time.time)
+        {
+            AudioManager.PlaySound(SoundType.MAN_yell, 0.8f);
+            _nextSound = Time.time + AudioManager.GetSoundLength(SoundType.MAN_yell);
+        }
+        
     }
 
     void End()
     {
+        AudioManager.StopSound();
+
         _chasing = false;
         _spotT = 0f;
         _lostT = 0f;

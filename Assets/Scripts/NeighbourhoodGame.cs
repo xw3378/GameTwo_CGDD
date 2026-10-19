@@ -561,7 +561,7 @@ internal class NbGame : MonoBehaviour
             // 挂在它下面会让光晕跟着一起缩放、还随它一起转。
             // y 跟着所在层走 —— 冰箱里如果还写死 0.055，六层的光晕会全掉到底层地板上。
             GameObject halo = Nb.Cyl(Root, "Cheese Halo " + (i + 1),
-                new Vector3(at.x, at.y + 0.014f, at.z), 1.15f, 0.012f, new Color(1f, 0.86f, 0.32f));
+                new Vector3(at.x, at.y + 0.014f, at.z), 1.15f, 0.012f, new Color(1f, 0.86f, 0.32f), false);
 
             NbCheese c = go.AddComponent<NbCheese>();
             c.Index = i;
@@ -753,6 +753,7 @@ internal class NbGame : MonoBehaviour
             if (_doorOpenLeft > 0f)
             {
                 hud.SetMeter("DOOR  OPEN  -  STAY  DOWN", 1f, new Color(1f, 0.95f, 0.78f));
+                AudioManager.PlaySound(SoundType.hum, 0.6f);
             }
             else if (DoorT <= DoorWarnTime)
             {
@@ -946,12 +947,14 @@ internal class NbGame : MonoBehaviour
 
             if (_doorOpenLeft <= 0f)
             {
+                AudioManager.StopSound();
                 _doorOpenLeft = 0f;
                 // **必须在这里把间隔重新装上。** 少了这一句，DoorT 还是 0，
                 // 下一帧立刻又满足 "DoorT <= 0" ⇒ 门关上的同一帧就又开了，
                 // 表现是"门再也关不上"，而且不报错、HUD 的倒计时一直显示 0。
                 DoorT = _doorGap;
                 _doorWarned = false;
+                AudioManager.PlaySound(SoundType.FRIDGE_close);
 
                 // 关门那一刻如果玩家跑到门外的厨房地板上，把他收回来。
                 // 不收的话他就被封在冰箱外面了 —— 食物全在里面，而"下一次开门"要等 8~15 秒，
@@ -969,6 +972,7 @@ internal class NbGame : MonoBehaviour
 
             if (!_doorWarned && DoorT <= DoorWarnTime)
             {
+                AudioManager.PlaySound(SoundType.FRIDGE_open);
                 _doorWarned = true;
                 Toast = "THE DOOR IS OPENING";
                 ToastT = 1.7f;
@@ -980,6 +984,7 @@ internal class NbGame : MonoBehaviour
                 DoorT = 0f;
                 _doorOpenLeft = _doorOpenFor;
                 _doorHit = false;
+                
                 Debug.LogFormat("[Nb] 冰箱门打开（{0:F1} s）。玩家在 ({1:F1}, {2:F1}, y={3:F2})，{4}。",
                     _doorOpenFor, Player.position.x, Player.position.z, Player.position.y,
                     IsHidden() ? "藏在掩体后面" : "暴露在空地上");
@@ -1207,6 +1212,7 @@ internal class NbGame : MonoBehaviour
             c.gameObject.SetActive(false);
             Held.Add(c);
 
+            AudioManager.PlaySound(SoundType.nom, 0.9f);
             Collected++;
             Toast = Collected >= CheeseNeeded ? "THAT IS ENOUGH" : (CheeseNeeded - Collected) + " MORE TO GO";
             ToastT = 1.3f;
@@ -1523,6 +1529,9 @@ internal class NbCat : MonoBehaviour
             name, dest.x, dest.z, _player != null ? Nb.FlatDist(dest, _player.position) : -1f);
     }
 
+    bool _wasSeeing = false;
+    float _nextMeow = 0;
+    float _nextHiss = 0;
     void Update()
     {
         if (NbGame.I == null || NbGame.I.Finished) return;
@@ -1543,11 +1552,26 @@ internal class NbCat : MonoBehaviour
         }
 
         bool see = CanSee();
+        bool justSaw = see && !_wasSeeing;
+        _wasSeeing = see;                       // update immediately, before any early return
+
         if (see)
         {
+            if (justSaw && Time.time >= _nextMeow)
+            {
+                AudioManager.PlaySound(SoundType.CAT_Meow, 0.5f);
+                _nextMeow = Time.time + AudioManager.GetSoundLength(SoundType.CAT_Meow);
+                _nextHiss = _nextMeow + 0.5f;     // don't hiss right on top of the meow
+            }
+            else if (_chasing && Time.time >= _nextHiss)
+            {
+                AudioManager.PlaySound(SoundType.CAT_Hiss, 0.7f);
+                _nextHiss = Time.time + AudioManager.GetSoundLength(SoundType.CAT_Hiss) + 0.5f;
+            }
+
             _chasing = true;
             _lost = 0f;
-            _lastSeen = _player.position;      // 只记位置，不实时跟踪
+            _lastSeen = _player.position;
         }
         else if (_chasing)
         {
@@ -1660,6 +1684,7 @@ internal class NbCat : MonoBehaviour
     /// 中间不能隔着楼或围墙。
     bool CanSee()
     {
+
         if (_player == null) return false;
 
         // 出生点周围 6 m 是安全区：猫不追进来。
@@ -1691,6 +1716,8 @@ internal class NbCat : MonoBehaviour
         {
             if (hit.collider != null && hit.collider.transform.root != _player.root) return false;
         }
+
+        
         return true;
     }
 }

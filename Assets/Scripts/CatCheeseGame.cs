@@ -692,7 +692,11 @@ internal class CatCheeseGame : MonoBehaviour
                 Transform ch = cheeses[i];
                 if (ch == null) continue;
                 bool sameLevel = Mathf.Abs(feetY - ch.position.y) < SameLevelY;
-                if (sameLevel && HorizontalDist(playerCenter, ch.position) < eatRadius) Eat(i, ch);
+                if (sameLevel && HorizontalDist(playerCenter, ch.position) < eatRadius)
+                {
+                    Eat(i, ch);
+                }
+
             }
 
             // 集齐了：等「被咬掉」的动画播完再切结算页，否则最后一块刚碰到就被切走、看不到它消失

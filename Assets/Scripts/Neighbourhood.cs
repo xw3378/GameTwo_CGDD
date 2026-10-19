@@ -210,7 +210,7 @@ internal static class Nb
     }
 
     /// 方块。solid = true 时保留碰撞体并留在 Default 层（用来挡人、挡视线）。
-    internal static GameObject Box(Transform parent, string name, Vector3 local, Vector3 size, Color color, bool solid = false)
+    internal static GameObject Box(Transform parent, string name, Vector3 local, Vector3 size, Color color, bool solid = true)
     {
         GameObject go = GameObject.CreatePrimitive(PrimitiveType.Cube);
         go.name = name;
@@ -222,7 +222,7 @@ internal static class Nb
     }
 
     /// 圆柱（Unity 原始圆柱高 2、直径 1，所以 y 要除 2）。
-    internal static GameObject Cyl(Transform parent, string name, Vector3 local, float diameter, float height, Color color, bool solid = false)
+    internal static GameObject Cyl(Transform parent, string name, Vector3 local, float diameter, float height, Color color, bool solid = true)
     {
         GameObject go = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
         go.name = name;
@@ -234,7 +234,7 @@ internal static class Nb
     }
 
     /// 球（Unity 原始球直径 1）。
-    internal static GameObject Ball(Transform parent, string name, Vector3 local, float diameter, Color color, bool solid = false)
+    internal static GameObject Ball(Transform parent, string name, Vector3 local, float diameter, Color color, bool solid = true)
     {
         GameObject go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         go.name = name;

@@ -163,9 +163,9 @@ internal static class NbYard
             new Vector3(XMax - XMin, 0.40f, ZMax - ZMin), Grass, true);
 
         Nb.Box(p, "Path N-S", new Vector3(CX, 0.004f, CZ),
-            new Vector3(2.2f, 0.008f, ZMax - ZMin - 1.5f), Dirt);
+            new Vector3(2.2f, 0.008f, ZMax - ZMin - 1.5f), Dirt, false);
         Nb.Box(p, "Path E-W", new Vector3(CX, 0.006f, -34f),
-            new Vector3(XMax - XMin - 1.5f, 0.008f, 2.0f), Dirt);
+            new Vector3(XMax - XMin - 1.5f, 0.008f, 2.0f), Dirt, false);
     }
 
     /// 南 / 西 / 东三面砖墙，北面是主屋自己挡着。墙厚 0.4、高 2.6 ——
@@ -183,11 +183,11 @@ internal static class NbYard
 
         // 压顶：给墙一条亮边，夜里才看得出"这是边界"而不是一片黑
         Nb.Box(p, "Yard Cap S", new Vector3(CX, h + 0.06f, ZMin + t * 0.5f),
-            new Vector3(XMax - XMin, 0.12f, t + 0.12f), WallCap);
+            new Vector3(XMax - XMin, 0.12f, t + 0.12f), WallCap, false);
         Nb.Box(p, "Yard Cap W", new Vector3(XMin + t * 0.5f, h + 0.06f, CZ),
-            new Vector3(t + 0.12f, 0.12f, ZMax - ZMin), WallCap);
+            new Vector3(t + 0.12f, 0.12f, ZMax - ZMin), WallCap, false);
         Nb.Box(p, "Yard Cap E", new Vector3(XMax - t * 0.5f, h + 0.06f, CZ),
-            new Vector3(t + 0.12f, 0.12f, ZMax - ZMin), WallCap);
+            new Vector3(t + 0.12f, 0.12f, ZMax - ZMin), WallCap, false);
     }
 
     /// 北侧的主屋（玩家从后院看是"房子背面"）。它同时是北边界和一整片遮挡 ——
@@ -199,18 +199,18 @@ internal static class NbYard
 
         // 后门 + 门前的两级台阶（台阶是装饰，不挡人）
         Nb.Box(p, "Back Door", new Vector3(CX, 1.05f, ZMax - 0.03f),
-            new Vector3(1.10f, 2.10f, 0.10f), Door);
+            new Vector3(1.10f, 2.10f, 0.10f), Door, false);
         Nb.Box(p, "Step Low", new Vector3(CX, 0.07f, ZMax - 0.55f),
-            new Vector3(1.60f, 0.14f, 0.90f), WallCap);
+            new Vector3(1.60f, 0.14f, 0.90f), WallCap, false);
         Nb.Box(p, "Step High", new Vector3(CX, 0.16f, ZMax - 0.20f),
-            new Vector3(1.30f, 0.10f, 0.50f), WallCap);
+            new Vector3(1.30f, 0.10f, 0.50f), WallCap, false);
 
         // 两扇窗（自发光的暗黄）：夜里给北侧一点可辨的方向
         for (int i = 0; i < 2; i++)
         {
             float x = CX + (i == 0 ? -9.5f : 9.5f);
             Nb.Box(p, "Window " + i, new Vector3(x, 2.15f, ZMax - 0.02f),
-                new Vector3(1.30f, 1.05f, 0.06f), new Color(0.34f, 0.27f, 0.14f));
+                new Vector3(1.30f, 1.05f, 0.06f), new Color(0.34f, 0.27f, 0.14f), false);
         }
     }
 
@@ -233,17 +233,17 @@ internal static class NbYard
         Nb.Box(p, "Woodpile", new Vector3(99f, 0.65f, -14f),
             new Vector3(2.6f, 1.30f, 1.4f), Wood, true);
         Nb.Box(p, "Woodpile Cap", new Vector3(99f, 1.36f, -14f),
-            new Vector3(2.9f, 0.14f, 1.7f), RoofCol);
+            new Vector3(2.9f, 0.14f, 1.7f), RoofCol, false);
 
         Nb.Box(p, "Dog House", new Vector3(56f, 0.75f, -10f),
             new Vector3(2.2f, 1.50f, 2.0f), Wood, true);
         Nb.Box(p, "Dog Roof", new Vector3(56f, 1.62f, -10f),
-            new Vector3(2.7f, 0.22f, 2.5f), RoofCol);
+            new Vector3(2.7f, 0.22f, 2.5f), RoofCol, false);
 
         Nb.Box(p, "Shed", new Vector3(44.5f, 1.05f, -17f),
             new Vector3(3.4f, 2.10f, 3.0f), ShedCol, true);
         Nb.Box(p, "Shed Roof", new Vector3(44.5f, 2.16f, -17f),
-            new Vector3(3.8f, 0.16f, 3.4f), RoofCol);
+            new Vector3(3.8f, 0.16f, 3.4f), RoofCol, false);
     }
 
     static void Bush(Transform p, string n, float x, float z, float d)
@@ -251,8 +251,8 @@ internal static class NbYard
         // 主球是实体的：它既是视觉主体，也是保安视线的遮挡物。
         Nb.Ball(p, n, new Vector3(x, d * 0.30f, z), d, BushA, true);
         // 两个小一点的副球不挡人，只是把轮廓打碎，别让灌木看起来像一个台球。
-        Nb.Ball(p, n + " b", new Vector3(x + d * 0.26f, d * 0.20f, z + d * 0.18f), d * 0.66f, BushB);
-        Nb.Ball(p, n + " c", new Vector3(x - d * 0.22f, d * 0.16f, z - d * 0.20f), d * 0.58f, BushB);
+        Nb.Ball(p, n + " b", new Vector3(x + d * 0.26f, d * 0.20f, z + d * 0.18f), d * 0.66f, BushB, false);
+        Nb.Ball(p, n + " c", new Vector3(x - d * 0.22f, d * 0.16f, z - d * 0.20f), d * 0.58f, BushB, false);
     }
 
     static void Bins(Transform p, string n, float x, float z)
@@ -273,13 +273,13 @@ internal static class NbYard
         Nb.Box(p, n + " Post E", new Vector3(CX + hw, 1.10f, z),
             new Vector3(0.14f, 2.20f, 0.14f), Wood, true);
         Nb.Box(p, n + " Rope", new Vector3(CX, 2.08f, z),
-            new Vector3(len, 0.03f, 0.03f), Cloth);
+            new Vector3(len, 0.03f, 0.03f), Cloth, false);
 
         for (int i = 0; i < 3; i++)
         {
             float x = CX - len * 0.30f + i * len * 0.28f;
             Nb.Box(p, n + " Cloth " + i, new Vector3(x, 1.58f, z),
-                new Vector3(0.75f, 0.95f, 0.04f), Cloth);
+                new Vector3(0.75f, 0.95f, 0.04f), Cloth, false);
         }
     }
 
@@ -291,9 +291,9 @@ internal static class NbYard
         for (int i = 0; i < xs.Length; i++)
         {
             Nb.Box(p, "Bed " + i, new Vector3(xs[i], 0.10f, -47f),
-                new Vector3(3.6f, 0.20f, 1.4f), Soil);
+                new Vector3(3.6f, 0.20f, 1.4f), Soil, false);
             Nb.Box(p, "Bed " + i + " Crop", new Vector3(xs[i], 0.22f, -47f),
-                new Vector3(3.2f, 0.10f, 1.0f), BushB);
+                new Vector3(3.2f, 0.10f, 1.0f), BushB, false);
         }
     }
 }

@@ -161,7 +161,7 @@ internal static class NbKitchen
         // 天花板：只是视觉封顶（非实体），挡不住任何东西 —— 它的作用是让"上方有东西"这件事成立，
         // 不然抬头是一片虚空，1.2 m 走道的压迫感会整个消失。
         Nb.Box(p, "Kitchen Ceiling", new Vector3(CX, h - 0.05f, CZ),
-            new Vector3(XMax - XMin, 0.10f, ZMax - ZMin), new Color(0.09f, 0.09f, 0.10f));
+            new Vector3(XMax - XMin, 0.10f, ZMax - ZMin), new Color(0.09f, 0.09f, 0.10f), false);
     }
 
     /// 六条台面，每条切成南北两段，中间留 5 m 横通道。
@@ -179,12 +179,12 @@ internal static class NbKitchen
             Nb.Box(p, "Bench S" + i, new Vector3(x, 0.50f, southZ),
                 new Vector3(BenchW, 1.00f, southLen), Steel, true);
             Nb.Box(p, "Bench S" + i + " top", new Vector3(x, 1.03f, southZ),
-                new Vector3(BenchW + 0.10f, 0.06f, southLen + 0.10f), SteelTop);
+                new Vector3(BenchW + 0.10f, 0.06f, southLen + 0.10f), SteelTop, false);
 
             Nb.Box(p, "Bench N" + i, new Vector3(x, 0.50f, northZ),
                 new Vector3(BenchW, 1.00f, northLen), Steel, true);
             Nb.Box(p, "Bench N" + i + " top", new Vector3(x, 1.03f, northZ),
-                new Vector3(BenchW + 0.10f, 0.06f, northLen + 0.10f), SteelTop);
+                new Vector3(BenchW + 0.10f, 0.06f, northLen + 0.10f), SteelTop, false);
         }
     }
 
@@ -195,13 +195,13 @@ internal static class NbKitchen
         Nb.Box(p, "Fridge", new Vector3(XMin + 1.1f, 1.05f, -7.5f),
             new Vector3(1.8f, 2.10f, 2.0f), Fridge, true);
         Nb.Box(p, "Fridge Door", new Vector3(XMin + 2.02f, 1.10f, -7.5f),
-            new Vector3(0.06f, 1.80f, 1.70f), new Color(0.18f, 0.19f, 0.20f));
+            new Vector3(0.06f, 1.80f, 1.70f), new Color(0.18f, 0.19f, 0.20f), false);
 
         // 水池：东墙
         Nb.Box(p, "Sink", new Vector3(XMax - 1.2f, 0.52f, -7.5f),
             new Vector3(2.0f, 1.04f, 2.2f), Sink, true);
         Nb.Box(p, "Sink Rim", new Vector3(XMax - 1.2f, 1.06f, -7.5f),
-            new Vector3(2.2f, 0.06f, 2.4f), SteelTop);
+            new Vector3(2.2f, 0.06f, 2.4f), SteelTop, false);
 
         // 纸箱堆：横通道里两组，玩家横穿时必须绕 —— 也挡住横向的视线
         Crates(p, 52.0f, -16.0f, 2);
@@ -210,7 +210,7 @@ internal static class NbKitchen
         // 地漏 / 排水沟：纯装饰，给地面一点纹理（否则一条 22 m 的长走道毫无距离感）
         for (int i = 0; i < 6; i++)
             Nb.Box(p, "Drain " + i, new Vector3(Ax2, 0.006f, -27f + i * 4.0f),
-                new Vector3(0.9f, 0.012f, 0.5f), Sink);
+                new Vector3(0.9f, 0.012f, 0.5f), Sink, false);
     }
 
     static void Crates(Transform p, float x, float z, int n)
@@ -248,7 +248,7 @@ internal static class NbKitchen
 
             // 地面亮斑（非实体：玩家要能踩进去，只是"被看见"）
             Nb.Box(p, "Light Pool " + i, new Vector3(at.x, 0.010f, at.y),
-                new Vector3(PoolHalf * 2f, 0.012f, PoolHalf * 2f), Pool);
+                new Vector3(PoolHalf * 2f, 0.012f, PoolHalf * 2f), Pool, false);
         }
     }
 
