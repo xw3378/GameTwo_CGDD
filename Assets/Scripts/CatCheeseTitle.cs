@@ -11,8 +11,10 @@
 // 而运行时自建 EventSystem 还得给 InputSystemUIInputModule 配 actions，太脆。
 // 这里直接用 RectTransformUtility.RectangleContainsScreenPoint + Mouse/Keyboard.current，零依赖。
 //
-// 标题页期间：Time.timeScale = 0（猫停住、判定不推进）+ 禁用 FirstPersonMove + 每帧解锁光标，
+// 标题页期间：Time.timeScale = 0（猫停住、判定不推进）+ 把玩家的 AcceptInput 关掉 + 每帧解锁光标，
 // 所以「人还没开始，猫先走过来把玩家抓了」不会发生；也不依赖两个 Bootstrap 的先后顺序。
+// 注意「玩家不能动」用的是 AcceptInput 开关，不是 timeScale —— 新玩家读 unscaledDeltaTime，
+// 世界冻着它照样能走，两件事互不连坐。
 //
 // 只在本次 Play 第一次进入 SampleScene 时出现；按 R 重开一局不再弹（static _shownOnce）。
 
@@ -36,14 +38,16 @@ internal class CatCheeseTitle : MonoBehaviour
     static readonly Color32 OutlineColor = new Color32(28, 16, 6, 255);
 
     const string GameName = "STRAY RAT";
-    const string Tagline = "an alleyway survival game";
+    const string Tagline = "a residential block, after dark";
+    // 文案里只出现字母 / 数字 / 空格 / 句号逗号斜杠 —— 这套字体（Kindly Crunch）没有完整 ASCII，
+    // 破折号、波浪号、中点之类的装饰符号会渲染成空白且不报错。
     const string Blurb =
-        "Play as a stray rat scavenging the apartment hallway.\n" +
-        "Gather food and stay hidden - the cat is hunting you.\n" +
-        "Collect all 3 pieces of cheese without being caught.";
+        "Three places, ten levels each.  A residential block, a backyard patrol, a kitchen at night.\n" +
+        "Carry the food home before the cats or the torch finds you.  A bite costs 10 health.\n" +
+        "Pick your district after you press start.  Nothing is locked.";
     const string Creators = "by Maile & Xinyuan";
     const string ButtonLabel = "START GAME";
-    const string Hint = "click START GAME      or press SPACE / ENTER";
+    const string Hint = "click START GAME  (or anywhere)      or press any key";
 
     [Header("字号")]
     public float titleSize = 170f;
@@ -59,8 +63,15 @@ internal class CatCheeseTitle : MonoBehaviour
     public int sortingOrder = 200;          // 压过 HUD(50) 和结算层(100)
     public float inputDelay = 0.45f;        // 防误触：刚进来先不响应输入
 
+    public float autoStartAfter = 12f;      // 没人操作就自己开始（0 = 永不自动开始）
+
     static bool _shownOnce;
     static CatCheeseTitle _instance;
+
+    /// 标题页是不是还挡在前面。
+    /// NbGame 靠它区分「世界是被标题页冻住的」和「世界本来就该静止」——
+    /// 分不清这两件事，就会把"没人点开始"误诊成"玩家走不动"。
+    internal static bool Showing { get; private set; }
 
     RectTransform _buttonRect;
     Image _buttonImage;
@@ -74,6 +85,7 @@ internal class CatCheeseTitle : MonoBehaviour
     {
         _shownOnce = false;
         _instance = null;
+        Showing = false;
     }
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
@@ -98,6 +110,7 @@ internal class CatCheeseTitle : MonoBehaviour
     void Build()
     {
         _bornAt = Time.unscaledTime;
+        Showing = true;
         Time.timeScale = 0f;                // 猫停住、判定不推进（标题页期间世界静止）
         FreezePlayer();
 
@@ -214,32 +227,42 @@ internal class CatCheeseTitle : MonoBehaviour
 
         if (Time.unscaledTime - _bornAt < inputDelay) return;   // 防误触
 
-        bool clicked = mouse != null && mouse.leftButton.wasPressedThisFrame &&
-                       RectTransformUtility.RectangleContainsScreenPoint(_buttonRect, mouse.position.ReadValue());
-
+        // 判定比原来宽得多：**点屏幕任何地方**、**按任何键**都算开始。
+        // 以前只认"点在按钮矩形里"或 SPACE/ENTER —— 差几个像素就"点了没反应"，
+        // 而这时世界是 timeScale=0 冻着的，玩家看到的正是"画面在、怎么按都不动"。
+        bool clicked = mouse != null && mouse.leftButton.wasPressedThisFrame;
         Keyboard kb = Keyboard.current;
-        bool pressed = kb != null && (kb.spaceKey.wasPressedThisFrame ||
-                                      kb.enterKey.wasPressedThisFrame ||
-                                      kb.numpadEnterKey.wasPressedThisFrame);
+        bool pressed = kb != null && kb.anyKey.wasPressedThisFrame;
 
-        if (clicked || pressed) StartGame();
+        if (clicked || pressed) { StartGame(); return; }
+
+        // 兜底：一直没人动就自己开始。
+        // 没有这一条时，只要标题页没被关掉，世界就永远冻着 —— 而屏幕上看不出"是标题页没关"。
+        if (autoStartAfter > 0f && Time.unscaledTime - _bornAt > autoStartAfter)
+        {
+            Debug.LogFormat("[CatCheese] 标题页停留 {0:F0} 秒没有任何输入，自动开始（免得世界一直冻在 timeScale=0）。",
+                autoStartAfter);
+            StartGame();
+        }
     }
 
     void StartGame()
     {
         _starting = true;
-        Debug.Log("[CatCheese] 开始游戏 —— 标题页收起，玩家接管鼠标。");
+        Showing = false;
+        Debug.Log("[CatCheese] 标题页收起 —— 进入场景选择。");
 
-        // 先放开玩家，再交还鼠标锁定：
-        // enabled = true 会让没跑过 Start 的 FirstPersonMove 在同帧补跑 Start（它就是 LockCursor 的），
-        // 而 LockCursorNow() 覆盖「Start 早就跑过、光标却被标题页解锁了」那种情况。
-        foreach (FirstPersonMove move in Object.FindObjectsByType<FirstPersonMove>(FindObjectsInactive.Include, FindObjectsSortMode.None))
-        {
-            move.enabled = true;
-            move.LockCursorNow();
-        }
+        // **这里故意不交还操作权。** 接下来是场景选择页，玩家在这一屏不该能走；
+        // 操作权在"选中场景"那一刻交（NbGame.LoadLevel 会设 AcceptInput = true）。
+        // 旧版在这里直接打开，结果选择页浮在上面、底下的人还能跑 —— 会走到场景边缘去。
+        if (NbPlayer.I != null) NbPlayer.I.AcceptInput = false;
+
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
 
         Time.timeScale = 1f;
+
+        NbSceneSelect.Show();
         StartCoroutine(FadeOut());
     }
 
@@ -258,8 +281,10 @@ internal class CatCheeseTitle : MonoBehaviour
 
     void FreezePlayer()
     {
-        foreach (FirstPersonMove move in Object.FindObjectsByType<FirstPersonMove>(FindObjectsInactive.Include, FindObjectsSortMode.None))
-            if (move.enabled) move.enabled = false;
+        // 只关"能不能操作"这一个开关，不碰 timeScale、也不 disable 任何组件。
+        // 新玩家（NbPlayer）的移动读的是 unscaledDeltaTime，所以"世界冻着"和"人不能动"
+        // 是两件独立的事 —— 这样标题页永远不会顺带把玩家永久锁死。
+        if (NbPlayer.I != null) NbPlayer.I.AcceptInput = false;
     }
 
     TextMeshProUGUI MakeText(string goName, Transform parent, TMP_FontAsset font, float size, Color color, TextAlignmentOptions align)
@@ -321,6 +346,11 @@ internal class CatCheeseTitle : MonoBehaviour
 
     void OnDestroy()
     {
+        // 这一页没了就不再冻世界。少这一行，只要它不是走 StartGame 消失的
+        // （比如重开场景、被别的东西删掉），Showing 会一直停在 true，NbGame 就再也不敢放开 timeScale。
+        if (_instance == this) _instance = null;
+        Showing = false;
+
         if (_white != null)
         {
             if (_white.texture != null) Destroy(_white.texture);

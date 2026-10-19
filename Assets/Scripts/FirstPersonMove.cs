@@ -31,6 +31,16 @@ public class FirstPersonMove : MonoBehaviour
     float _vy;
     bool _cursorLocked;
 
+    // 刚锁光标 / 窗口刚拿回焦点的那一帧，鼠标 delta 是一次巨大的跳变（macOS 上尤其明显）。
+    // 一帧就能把俯仰顶到 −89°，画面变成"低头看自己脚下一块地砖" ——
+    // 地砖没有花纹、光照又平，整屏就是一个均匀的灰面，走起来画面几乎不变，
+    // 看上去就是"卡在这儿动不了"。所以这段时间内的 delta 一律丢弃。
+    float _ignoreMouseUntil;
+
+    // 眼高。玩家原点在**脚底**（CharacterController 的 center 是 (0, 0.9, 0)），
+    // 而场景里相机的本地 y 只有 0.26 —— 眼睛离地 0.3 m，视角跟趴在地上一样。
+    internal const float EyeHeight = 1.62f;
+
     void Start()
     {
         _cc = GetComponent<CharacterController>();
@@ -63,8 +73,20 @@ public class FirstPersonMove : MonoBehaviour
             _head = headGo.transform;
             Debug.LogWarning("[FirstPersonMove] FirstPersonController 下没有相机，已自动造一个 Head (auto)。");
         }
+        // 眼高：只在明显偏低时才纠正（别人手摆的高度不覆盖）。
+        // 低了会发生什么：整屏只有脚下一块地砖 + 路灯的一圈光晕，没有任何边缘，
+        // 人眼分不出"在动"和"没动"，这就是前几轮"卡住"的真身之一。
+        Vector3 lp = _head.localPosition;
+        if (lp.y < 0.9f)
+        {
+            _head.localPosition = new Vector3(lp.x, EyeHeight, lp.z);
+            Debug.LogFormat("[FirstPersonMove] 相机本地高度只有 {0:F2} m（玩家原点在脚底）—— 已抬到眼高 {1:F2} m。",
+                lp.y, EyeHeight);
+        }
+
         _pitch = _head.localEulerAngles.x;
         if (_pitch > 180f) _pitch -= 360f;
+        if (Mathf.Abs(_pitch) > 60f) _pitch = 0f;    // 场景里那台相机横歪 88°，别把歪的姿势带进来
 
         LockCursor();
         Debug.Log("[FirstPersonMove] 已接管「" + name + "」：WASD/方向键移动，Shift 跑，Space 跳，鼠标转视角，Esc 释放鼠标。");
@@ -84,11 +106,23 @@ public class FirstPersonMove : MonoBehaviour
         if (enableMouseLook && _cursorLocked && mouse != null)
         {
             Vector2 d = mouse.delta.ReadValue();
+
+            // 锁光标后的头几帧 + 单帧超大跳变：一律当成噪声丢掉（详见 _ignoreMouseUntil 的注释）
+            if (Time.unscaledTime < _ignoreMouseUntil || d.sqrMagnitude > 120f * 120f) d = Vector2.zero;
+
             float yaw = d.x * lookSensitivity;
             _pitch = Mathf.Clamp(_pitch - d.y * lookSensitivity, -89f, 89f);
             transform.Rotate(0f, yaw, 0f);              // 偏航转身体（你的胶囊）
             _head.localEulerAngles = new Vector3(_pitch, 0f, 0f); // 俯仰转头
         }
+
+        // —— 键盘转向兜底 ——
+        // 鼠标视角一旦失灵（光标没锁上、设备没连、系统把 delta 吃掉），人还能左右看，
+        // 不至于"画面不变 ⇒ 以为卡死"。Q/E 各 90°/s。
+        float yawKey = 0f;
+        if (kb.qKey.isPressed) yawKey -= 90f;
+        if (kb.eKey.isPressed) yawKey += 90f;
+        if (Mathf.Abs(yawKey) > 0.01f) transform.Rotate(0f, yawKey * Time.deltaTime, 0f);
 
         // —— 平面移动（相对身体朝向）——
         float h = 0f, v = 0f;
@@ -118,6 +152,23 @@ public class FirstPersonMove : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
         _cursorLocked = true;
+        _ignoreMouseUntil = Time.unscaledTime + 0.35f;   // 丢掉锁定瞬间那次跳变
+    }
+
+    /// 由关卡脚本调用：把视角摆正（俯仰归零、身体朝向不动）。
+    /// PlacePlayer 以前直接写 `head.localRotation`，但本脚本每帧又会用 `_pitch` 覆盖回去 ——
+    /// `_pitch` 里的旧值（可能已经是 −89°）会立刻把刚摆正的镜头再压到地上。
+    /// 所以要摆正就得连 `_pitch` 一起清，这才有了这个方法。
+    internal void ResetLook()
+    {
+        _pitch = 0f;
+        if (_head != null)
+        {
+            _head.localRotation = Quaternion.identity;
+            Vector3 lp = _head.localPosition;
+            if (lp.y < 0.9f) _head.localPosition = new Vector3(lp.x, EyeHeight, lp.z);
+        }
+        _ignoreMouseUntil = Time.unscaledTime + 0.35f;
     }
 
     /// 由标题页 / 结算页调用：立刻把鼠标交还玩家（等价于玩家点了一下画面）。
@@ -151,6 +202,16 @@ public class FirstPersonMove : MonoBehaviour
     static void Install(Scene scene)
     {
         if (scene.name != "SampleScene") return;
+
+        // 居民区关卡已经换成 NbPlayer（自己 new 一个玩家、自带身体和相机）。
+        // 这里必须彻底让路：否则它会再给场景里那个 FirstPersonController 补一个
+        // CharacterController、锁一次光标、并把 FlyCamera 一起清掉 —— 全是白做的，
+        // 而且锁光标会和 NbPlayer 抢。
+        if (NbMode.Enabled)
+        {
+            Debug.Log("[FirstPersonMove] 本关已由 NbPlayer 接管，旧的第一人称不再装配。");
+            return;
+        }
 
         GameObject player = null;
         foreach (GameObject root in scene.GetRootGameObjects())

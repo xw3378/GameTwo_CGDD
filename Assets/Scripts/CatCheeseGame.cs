@@ -41,6 +41,9 @@ internal static class CatCheeseBootstrap
 
     static void Handle(Scene scene)
     {
+        // 居民区关卡接管后，旧的「猫吃奶酪」整套装配让位；把 Enabled 改回 false 就能复现旧玩法
+        if (NbMode.Enabled) return;
+
         if (scene.name == SampleSceneName) CatCheeseSetup.Install();
         else if (scene.name == UiSceneName) ApplyEndScreen(scene);
     }
@@ -221,7 +224,7 @@ internal static class CatCheeseSetup
 
     /// 按网格实测把模型归一化到目标高度，再把底面贴到地面。
     /// 返回**贴好之后的**世界包围盒（失败时返回零尺寸盒），调用方用它来加碰撞体 / 定扫掠参数。
-    static Bounds FitAndGround(GameObject go, float targetHeight, Vector3 xz, string label)
+    internal static Bounds FitAndGround(GameObject go, float targetHeight, Vector3 xz, string label)
     {
         Bounds raw;
         if (!TryMeasureWorldBounds(go, out raw) || raw.size.y <= 1e-6f)
@@ -264,13 +267,14 @@ internal static class CatCheeseSetup
     /// 给生成物挂一个「贴合模型外形」的实体 BoxCollider —— 撞上去不会穿模。
     /// 尺寸取网格实测的世界包围盒，再换算回根节点本地空间，所以缩放/旋转都是对的。
     /// 层仍留在 Ignore Raycast：那层只对射线隐形（地面探测必须看不见生成物），物理碰撞照常生效。
-    internal static void AddSolidBoxCollider(GameObject go)
+    /// 返回挂上的那个碰撞体：调用方可能要拿它做 Physics.IgnoreCollision（比如让老鼠穿过奶酪）。
+    internal static Collider AddSolidBoxCollider(GameObject go)
     {
         Bounds b;
         if (!TryMeasureWorldBounds(go, out b) || b.size.sqrMagnitude <= 0f)
         {
             Debug.LogWarning("[CatCheese] " + go.name + "：量不到包围盒，没加碰撞体。");
-            return;
+            return null;
         }
 
         BoxCollider bc = go.GetComponent<BoxCollider>();
@@ -295,10 +299,11 @@ internal static class CatCheeseSetup
         bc.size = lmax - lmin;
         Debug.LogFormat("[CatCheese] {0}：已加实体碰撞体（本地尺寸 {1:F3}×{2:F3}×{3:F3} m，中心 ({4:F3}, {5:F3}, {6:F3})）。",
             go.name, bc.size.x, bc.size.y, bc.size.z, bc.center.x, bc.center.y, bc.center.z);
+        return bc;
     }
 
     /// 生成模型；资源缺失时退化为占位方块（游戏仍可玩）。缩放与贴地由 FitAndGround 负责。
-    static GameObject SpawnModel(string resourcePath, Color fallbackColor, string goName)
+    internal static GameObject SpawnModel(string resourcePath, Color fallbackColor, string goName)
     {
         GameObject prefab = Resources.Load<GameObject>(resourcePath);
         GameObject go = null;
@@ -330,7 +335,7 @@ internal static class CatCheeseSetup
     }
 
     /// 奶酪贴图：FBX 导入不会自动连外部贴图，运行时手动接 albedo
-    static void WireCheeseTexture(GameObject cheese)
+    internal static void WireCheeseTexture(GameObject cheese)
     {
         Texture2D albedo = Resources.Load<Texture2D>("GameProps/Cheese_0001_albedo");
         if (albedo == null)
@@ -346,7 +351,7 @@ internal static class CatCheeseSetup
     }
 
     /// 用骨骼自动判别猫的正面（脚尖方向最可靠，头-盆骨兜底），对齐到移动方向
-    static void OrientCatByBones(GameObject cat, Vector3 moveDir)
+    internal static void OrientCatByBones(GameObject cat, Vector3 moveDir)
     {
         Vector3 fwd = Vector3.zero;
         int found = 0;
@@ -398,7 +403,7 @@ internal static class CatCheeseSetup
     }
 
     /// 播放走路动画：优先 legacy Animation 组件，否则用 PlayableGraph（无需 AnimatorController）
-    static void PlayWalkAnimation(GameObject cat)
+    internal static void PlayWalkAnimation(GameObject cat)
     {
         Animation legacy = cat.GetComponentInChildren<Animation>(true);
         if (legacy != null && legacy.clip != null)

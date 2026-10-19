@@ -73,3 +73,38 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
+
+# ---------------------------------------------------------------
+# macOS 系统垃圾文件（Finder 在每个目录都会生成，和项目内容无关）
+# ---------------------------------------------------------------
+.DS_Store
+.DS_Store?
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# ---------------------------------------------------------------
+# 编辑器 / IDE 的个人配置（各人机器不一样，进仓库只会互相打架）
+# ---------------------------------------------------------------
+.idea/
+*.iml
+.vscode/
+*.code-workspace
+
+# 合并冲突 / 编辑器崩溃留下的残渣
+*.orig
+*.rej
+*.swp
+
+# ---------------------------------------------------------------
+# 仓库根目录的两份「素材原始包」
+# 它们不在 Assets/ 下、Unity 完全不读，而 Assets/ 里已有 md5 完全一致的副本
+# （cat-walk/source/Cat walk.glb == Assets/Resources/GameProps/Cat walk.glb，
+#   cheddar-cheese/ == Assets/StudentTools/FlyCamera/cheddar-cheese/，共 18 MB）
+# 注意：这两条要配 `git rm -r --cached cat-walk cheddar-cheese` 才会从索引里消失，
+#       否则「已跟踪」的文件不受 .gitignore 影响。
+# ---------------------------------------------------------------
+/cat-walk/
+/cheddar-cheese/
