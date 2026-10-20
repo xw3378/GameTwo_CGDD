@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-label="Recording placeholder">
+  <rect width="1600" height="900" fill="#0f1218"/>
+  <rect x="48" y="48" width="1504" height="804" fill="none" stroke="rgba(239,230,207,0.18)" stroke-width="2" rx="8"/>
+  <rect x="80" y="80" width="1440" height="740" fill="#1a1f28" rx="4"/>
+  <polygon points="740,390 740,510 860,450" fill="rgba(239,230,207,0.15)"/>
+  <text id="poster-title" x="800" y="580" text-anchor="middle" fill="#efe6cf" font-family="ui-sans-serif, system-ui, sans-serif" font-size="48" font-weight="600">White box</text>
+  <text x="800" y="640" text-anchor="middle" fill="rgba(239,230,207,0.45)" font-family="ui-monospace, monospace" font-size="22">Recording placeholder · 录屏占位</text>
+</svg>

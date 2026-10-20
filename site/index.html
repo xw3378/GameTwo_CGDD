@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en" data-lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>White box · CGDD</title>
+  <meta name="description" content="CGDD student site: script framework, change log, and the playable.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+SC:wght@460;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="media/poster.svg" type="image/svg+xml">
+</head>
+<body>
+  <a class="skip" href="#framework" data-i18n="skip">Skip to framework</a>
+  <header class="top">
+    <p class="kicker" data-i18n="kicker">CGDD · Unity 6 · White box</p>
+    <div class="title-row">
+      <h1>White<br>box</h1>
+      <p class="lede" data-i18n="lede">White box: play in Unity, tune from script headers, and keep the student site in sync with Export Trace Docs.</p>
+    </div>
+  </header>
+  <nav>
+    <a href="#framework" data-i18n="nav1">01 Framework</a>
+    <a href="#process" data-i18n="nav2">02 Process</a>
+    <a href="#playable" data-i18n="nav3">03 Playable</a>
+    <div class="lang-switch" role="group" data-i18n-aria="lang-label" aria-label="Language">
+      <button type="button" data-lang="zh" aria-pressed="false">中文</button>
+      <button type="button" data-lang="en" aria-pressed="true">EN</button>
+    </div>
+  </nav>
+  <main>
+    <section id="framework">
+      <header class="section-head">
+        <p class="index">01</p>
+        <div>
+          <h2><span class="lang-main" data-i18n="h-framework">Framework</span> <span class="lang-alt" data-i18n="h-framework-en">框架</span></h2>
+          <p data-i18n-html="framework-lead">Arrows are <code>@calls</code>. The second line of a box is <code>@role</code>. Click a box to open that script. The table is <code>@tune</code>. All of this is exported from the script headers, not drawn by hand.</p>
+        </div>
+      </header>
+      <div class="flow-stage">
+        <div class="card flow-card">
+          <div id="flow" data-i18n="flow-loading">Drawing…</div>
+          <ul class="flow-legend" data-i18n-aria="legend-label" aria-label="Node colors">
+            <li><span class="swatch swatch-manager"></span><span data-i18n="legend-manager">Rules</span></li>
+            <li><span class="swatch swatch-actor"></span><span data-i18n="legend-actor">Player</span></li>
+            <li><span class="swatch swatch-world"></span><span data-i18n="legend-world">World</span></li>
+            <li><span class="swatch swatch-ui"></span><span data-i18n="legend-ui">Interface</span></li>
+          </ul>
+        </div>
+        <article id="script-view" class="card script-view" aria-live="polite">
+          <p id="script-empty" class="script-empty" data-i18n="script-empty">Click a box in the flowchart to open that script.</p>
+          <div id="script-body" hidden>
+            <header class="script-head">
+              <div>
+                <p class="script-name" id="script-title"></p>
+                <p class="script-role" id="script-role"></p>
+                <p class="script-path" id="script-path"></p>
+              </div>
+              <button type="button" id="script-close" data-i18n="script-close">Close</button>
+            </header>
+            <p id="script-note" class="script-note" hidden></p>
+            <pre id="script-code" tabindex="0"></pre>
+          </div>
+        </article>
+      </div>
+      <div class="split">
+        <div id="tunables" class="card">Reading tunables…</div>
+        <div id="challenge" class="card">Reading the challenge table…</div>
+      </div>
+    </section>
+    <section id="process">
+      <header class="section-head">
+        <p class="index">02</p>
+        <div>
+          <h2><span class="lang-main" data-i18n="h-process">Process</span> <span class="lang-alt" data-i18n="h-process-en">过程</span></h2>
+          <p data-i18n="process-lead">Only changes to the game are appended. The site and its languages are not logged here. Sections marked EXAMPLE are format samples for students.</p>
+        </div>
+      </header>
+      <div id="devlog-intro" class="card prose"></div>
+      <ol id="timeline" class="timeline"></ol>
+    </section>
+    <section id="playable">
+      <header class="section-head">
+        <p class="index">03</p>
+        <div>
+          <h2><span class="lang-main" data-i18n="h-playable">Playable</span> <span class="lang-alt" data-i18n="h-playable-en">成果</span></h2>
+          <p data-i18n-html="playable-lead">Play the game in Unity. This space is for a recording. Put <code>site/media/play.mp4</code> when you have one.</p>
+        </div>
+      </header>
+      <figure class="screen" id="screen">
+        <video id="rec" poster="media/poster.svg" controls playsinline preload="none" hidden></video>
+        <div class="screen-fallback" id="screen-fallback">
+          <p class="stamp" data-i18n="screen-stamp">Recording placeholder</p>
+          <p data-i18n-html="screen-missing">No recording yet. Put a file at <code>site/media/play.mp4</code> and refresh. This poster becomes the video.</p>
+        </div>
+      </figure>
+    </section>
+  </main>
+  <footer>
+    <p data-i18n-html="footer">The game lives in the Unity project. The framework is in <code>docs/</code>. The process is in <code>DEVLOG.md</code>. This page just lays them out.</p>
+  </footer>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script src="data/bundle.js"></script>
+  <script src="lang.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
