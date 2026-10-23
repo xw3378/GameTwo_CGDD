@@ -1,3 +1,5 @@
+// @role Residential-block level data: world bounds, block grid, walkways, spawn, cheese spots, cat routes.
+
 // Neighbourhood.cs — 「居民区」关卡的空间定义 + 搭场景用的几何小工具
 //
 // 布局不是拍脑袋定的：**先把 12 个楼栋的 BoxCollider 世界包络量出来，再从包络反推过道。**

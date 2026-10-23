@@ -1,3 +1,9 @@
+// @role Fridge level: six shelves, stair ascent, cover props, and the door that floods light on a timer.
+// @calls NbFood NbFoodArt NbLighting
+// @tune Layers:int:2-12:number of shelves
+// @tune LayerH:float:0.2-2:shelf spacing (floor-to-floor) m
+// @tune StepsPerLayer:int:1-10:stair steps between shelves
+
 // NbFridge.cs — 场景 03「冰箱里」
 //
 // ───────────────────────── 为什么这一关和前两关完全不同 ─────────────────────────

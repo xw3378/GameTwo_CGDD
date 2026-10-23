@@ -1,3 +1,6 @@
+// @role Recomputes the 12 model buildings' BoxColliders from local bounds (fixes a transposed-size bug).
+// @calls Nb
+
 // NbColliders.cs — 运行时给「换过模型的 12 栋楼」重量一次碰撞体
 //
 // 为什么需要这一步（这不是"保险起见"，是修一个真实存在的 bug）：

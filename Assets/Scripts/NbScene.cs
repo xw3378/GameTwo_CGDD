@@ -1,3 +1,6 @@
+// @role Scene shell: selects the active scene (Street/Yard/Kitchen/Fridge), holds its bounds/spawn/targets/routes, hides the street original.
+// @calls NbYard NbKitchen NbFridge NbBuilder
+
 // NbScene.cs — 三个场景的公共外壳
 //
 // 为什么需要这一层：

@@ -1,3 +1,5 @@
+// @role Entry point: Start button that loads SampleScene.
+
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;

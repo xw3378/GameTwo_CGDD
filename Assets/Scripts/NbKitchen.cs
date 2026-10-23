@@ -1,3 +1,8 @@
+// @role Kitchen level: six benches, five 1.2 m aisles, lethal light pools, dark-corner cats.
+// @calls NbScene Nb
+// @tune BenchW:float:1-10:bench width m
+// @tune AisleW:float:0.3-3:aisle width m
+
 // NbKitchen.cs — 场景 03「深夜厨房」
 //
 // 空间设计：

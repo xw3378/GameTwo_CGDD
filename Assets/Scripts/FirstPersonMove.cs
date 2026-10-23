@@ -1,3 +1,5 @@
+// @role Legacy first-person mover for the scene's old FirstPersonController (superseded by NbPlayer).
+
 // FirstPersonMove.cs — 给场景里的 FirstPersonController 加第一人称移动（运行时自装配）
 //
 // 键位：WASD / 方向键走路，Shift 跑 ×2，Space 跳，鼠标转视角，Esc 释放鼠标、点击画面重新锁定。

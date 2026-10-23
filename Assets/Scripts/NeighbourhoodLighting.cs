@@ -1,3 +1,8 @@
+// @role Re-lights the scene at night: a single moonlight key, faint fill, fog, and a night-sky clear colour.
+// @calls NbScene NbFridge
+// @tune KeyPower:float:0-1.5:moon key light intensity
+// @tune FillPower:float:0-0.5:fill light intensity
+
 // NeighbourhoodLighting.cs — 把场景那套"室内三点布光"收成居民区夜里的一盏月光
 //
 // 为什么要有这个文件（2026-10-17 18:03 排查记录，别再拆掉）：

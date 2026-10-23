@@ -1,3 +1,6 @@
+// @role Bottom-right minimap: player arrow, cat/cheese dots, scale bar, per-scene bounds.
+// @calls NbGame NbScene NbCat NbCheese NbUi
+
 // NeighbourhoodMap.cs — 右下角的方形定位盘
 //
 // 显示四件事：

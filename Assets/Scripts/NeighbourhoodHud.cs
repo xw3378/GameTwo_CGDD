@@ -1,3 +1,6 @@
+// @role In-game HUD: cheese count, toasts, health pips, exposure/rot/door meters, win/fail overlay.
+// @calls NbGame NbScene NbLevels NbUi NbFridge
+
 // NeighbourhoodHud.cs — 左上角奶酪计数 + 提示条 + 成功面板 + 被抓红闪
 //
 // 和工程里现成的 CheeseHud 同一套路：运行时建 Canvas，贴图全部程序化生成，

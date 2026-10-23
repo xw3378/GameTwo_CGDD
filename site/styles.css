@@ -436,6 +436,13 @@ h2 span.lang-alt {
   background: #0c0f0a;
 }
 
+.screen iframe {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border: 0;
+}
+
 .screen-fallback {
   position: absolute;
   inset: 0;

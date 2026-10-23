@@ -1,3 +1,12 @@
+// @role Yard night guard: random patrol, sweeping flashlight cone, chases and catches the mouse.
+// @calls NbGame NbGuardArt AudioManager
+// @tune Speed:float:0.3-3:patrol walk speed m/s
+// @tune Sweep:float:0.1-3:flashlight sweep pace (higher = faster)
+// @tune Range:float:5-40:flashlight beam range m
+// @tune Half:float:2-45:beam cone half-angle deg
+// @tune Damage:float:1-100:exposure gained per second in the beam
+// @tune ChaseSpeed:float:1-6:chase speed m/s (below player run)
+
 // NbGuard.cs — 夜巡保安（后院专属威胁）
 //
 // 设计意图（来自参考里的两条）：

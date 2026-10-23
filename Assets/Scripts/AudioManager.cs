@@ -1,3 +1,7 @@
+// @role Central audio hub: one-shot SFX, 3D cat/guard footstep loops, and the idle squeak.
+// @calls NbCat NbGuard
+// @tune HearRange:float:5-60:max audible distance (m) for cat/guard footsteps
+
 using System.Collections.Generic;
 using UnityEngine;
 

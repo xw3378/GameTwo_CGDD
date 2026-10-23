@@ -1,3 +1,6 @@
+// @role Pre-fridge rules screen: freezes the player and the door until dismissed by any key/click.
+// @calls NbGame NbPlayer NbUi
+
 // NbBriefing.cs — 进场前的玩法说明（目前只有冰箱用）
 //
 // 为什么这一关必须有它：

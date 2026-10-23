@@ -1,3 +1,6 @@
+// @role Title screen: shows the game name/blurb, starts the game via button or Space/Enter.
+// @calls NbSceneSelect
+
 // CatCheeseTitle.cs — 游戏标题页（运行时自装配，不改场景文件）
 //
 // 内容取自 "CGDD Game World Conceptualization"：游戏名 Stray Rat、创作者 Maile & Xinyuan、

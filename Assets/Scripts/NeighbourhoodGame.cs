@@ -1,3 +1,8 @@
+// @role Neighbourhood game manager: builds the scene, runs the 10-level loop, spawns cheese/cats/guards, resolves win/loss.
+// @calls NbScene NbLevels NbBuilder NbPlayer NbGuard NbCat NbCheese NbHud NbMap NbLighting NbFridge NbFood NbFoodArt NbColliders NbBriefing NbSceneSelect AudioManager
+// @tune DoorWarnTime:float:1-6:fridge door-open warning seconds
+// @tune CatHeight:float:0.5-3:cat height m (feeds cat body probe scale)
+
 // NeighbourhoodGame.cs — 居民区关卡：10 关，猫和奶酪一起变多，被抓一次 -10 血
 //
 // 装配方式沿用本工程的老规矩：运行时自己 new 出所有物体，场景文件一行不改。

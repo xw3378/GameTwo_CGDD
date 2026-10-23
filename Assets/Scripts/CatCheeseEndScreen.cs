@@ -1,3 +1,6 @@
+// @role Win/lose overlay for the legacy cat game: freezes time and shows Game Failed / You Win.
+// @calls CheeseHud
+
 // CatCheeseEndScreen.cs — 游戏内的成败覆盖层（运行时自装配，不改场景文件）
 //
 // 为什么不切到 UI_Screens 里的 End Screen 页：

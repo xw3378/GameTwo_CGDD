@@ -1,3 +1,6 @@
+// @role Scene-select page after the title: pick Street/Yard/Fridge, each with its own best-level progress.
+// @calls NbGame NbScene NbProgress NbUi
+
 // NbSceneSelect.cs — 标题页之后的场景选择页
 //
 // 为什么单独一页、而不是做进标题页：

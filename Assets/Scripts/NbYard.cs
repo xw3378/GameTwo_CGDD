@@ -1,3 +1,6 @@
+// @role Backyard level: scattered cover points around a wide-open centre, patrolled by guards with flashlights.
+// @calls NbScene Nb
+
 // NbYard.cs — 场景 02「夜巡后院」
 //
 // 这一关和街区唯一的区别就是**空间**，所以空间不能随便摆：

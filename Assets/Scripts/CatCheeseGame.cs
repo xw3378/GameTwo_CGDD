@@ -1,3 +1,9 @@
+// @role Legacy cat-and-cheese game: a cat patrols and the player collects 3 cheeses without being caught.
+// @calls CheeseHud CatCheeseEndScreen
+// @tune eatRadius:float:0.3-3:cheese pickup radius m
+// @tune catchRadius:float:0.5-5:cat catch radius m
+// @tune CatSpeed:float:0.3-6:cat patrol speed m/s
+
 // CatCheeseGame.cs — 猫吃奶酪玩法 v2（运行时自装配，不改场景文件、不改课程工具）
 //
 // 玩法：场景里放一个名为「CatMoveSpace」的空物体（Position 为中心、Scale 为尺寸的长方体，

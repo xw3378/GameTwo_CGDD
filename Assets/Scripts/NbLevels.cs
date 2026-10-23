@@ -1,3 +1,9 @@
+// @role Difficulty tables: 10 levels per scene (cheese/cats/speed/sight/guards/exposure/rot/door).
+// @calls NbScene
+// @tune BiteDamage:int:1-50:health lost per catch
+// @tune StartHp:int:10-500:starting health
+// @tune Count:int:1-20:levels per scene
+
 // NbLevels.cs — 三个场景 × 10 关的难度表
 //
 // 一关 = 一组数字，没有别的。骨架四个字段三个场景共用：

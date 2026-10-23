@@ -1,3 +1,6 @@
+// @role Loads the Mixamo guard model and hand-samples its walk animation onto the yard guard.
+// @calls NbGuard
+
 // NbGuardArt.cs — 把「会走路的真人」装到后院保安身上
 //
 // 模型：Assets/Resources/Guards/Walking.fbx

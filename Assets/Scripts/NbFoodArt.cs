@@ -1,3 +1,6 @@
+// @role Places imported grocery models as fridge shelf decoration (solid, ignore-raycast, off the cheese lanes).
+// @calls NbFridge NbFood
+
 // NbFoodArt.cs — 冰箱里的商品装饰（用你自己导进来的三个食物包，纯装饰，不参与玩法）
 //
 // ───────────────────────── 这些东西是什么 ─────────────────────────

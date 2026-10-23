@@ -1,3 +1,5 @@
+// @role Reset button: hides the current screen and brings the title screen back.
+
 using UnityEngine;
 using UnityEngine.UI;
 

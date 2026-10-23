@@ -1,3 +1,5 @@
+// @role Legacy HUD: top-right cheese counter for the cat-and-cheese game.
+
 // CheeseHud.cs — 右上角的奶酪计数（运行时自装配，不改场景文件）
 //
 // 显示：右上角一行小字「cheese」+ 一行大字「1 / 3」。吃到一块时数字会弹一下并闪成奶酪黄。

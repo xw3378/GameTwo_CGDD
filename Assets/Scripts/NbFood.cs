@@ -1,3 +1,6 @@
+// @role Builds fridge food out of raw geometry (carrot, tomato, apple, ...); decoration only, no colliders.
+// @calls Nb
+
 // NbFood.cs — 冰箱里的食物（纯几何体拼的，不依赖任何模型资源）
 //
 // 为什么不用模型：Resources/GameProps 里只有「Cat walk」和「Cheese_0001_LOD0」两样东西。

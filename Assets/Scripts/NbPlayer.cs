@@ -1,3 +1,11 @@
+// @role First-person mouse controller: builds its own body and camera; walk/run/jump, look, idle squeak.
+// @calls NbGame AudioManager
+// @tune WalkSpeed:float:1-4:walk speed m/s
+// @tune RunMul:float:1-3:run multiplier on WalkSpeed
+// @tune JumpSpeed:float:1-6:jump take-off velocity m/s
+// @tune Gravity:float:-40--5:gravity acceleration m/s2
+// @tune LookSens:float:0.02-0.5:mouse look sensitivity deg/pixel
+
 // NbPlayer.cs — 第一人称玩家（全新一套：自己造身体、自己造相机，不读场景里任何东西）
 //
 // ───────────────────────── 为什么要重写 ─────────────────────────

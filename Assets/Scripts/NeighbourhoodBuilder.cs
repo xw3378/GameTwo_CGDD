@@ -1,3 +1,6 @@
+// @role Builds the residential-block environment: grass, walkways, walls, gate, lamps, trees, bins, planters.
+// @calls Nb
+
 // NeighbourhoodBuilder.cs — 把 12 栋楼之间的空地搭成一个封闭的居民区
 //
 // 只负责"环境"：草地、过道铺装、围墙+大门、路灯、树、垃圾桶、花坛。

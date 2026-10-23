@@ -2,8 +2,8 @@ window.CGDD_LANG = {
   ui: {
     zh: {
       skip: "跳到框架",
-      kicker: "CGDD · Unity 6 · White box",
-      lede: "White box：在 Unity 里玩，用脚本头调参，Export Trace Docs 同步学生站。",
+      kicker: "CGDD · Unity 6 · Stray Rat",
+      lede: "Stray Rat：在 Unity 里玩，用脚本头调参，Export Trace Docs 同步学生站。",
       nav1: "01 框架 Framework",
       nav2: "02 过程 Process",
       nav3: "03 成果 Playable",
@@ -35,14 +35,14 @@ window.CGDD_LANG = {
       "screen-missing": "还没有录像。把文件放到 <code>site/media/play.mp4</code> 后刷新，这张海报会换成录像。",
       footer: "游戏在 Unity 工程里。框架在 <code>docs/</code>。过程在 <code>DEVLOG.md</code>。这一页只是把它们摊开。",
       "example-stamp": "示例 EXAMPLE",
-      title: "White box · CGDD",
+      title: "Stray Rat · CGDD",
       description: "CGDD 学生站：脚本框架、修改过程、可玩成果。",
       "lang-label": "语言"
     },
     en: {
       skip: "Skip to framework",
-      kicker: "CGDD · Unity 6 · White box",
-      lede: "White box: play in Unity, tune from script headers, and keep the student site in sync with Export Trace Docs.",
+      kicker: "CGDD · Unity 6 · Stray Rat",
+      lede: "Stray Rat: play in Unity, tune from script headers, and keep the student site in sync with Export Trace Docs.",
       nav1: "01 Framework",
       nav2: "02 Process",
       nav3: "03 Playable",
@@ -74,7 +74,7 @@ window.CGDD_LANG = {
       "screen-missing": "No recording yet. Put a file at <code>site/media/play.mp4</code> and refresh. This poster becomes the video.",
       footer: "The game lives in the Unity project. The framework is in <code>docs/</code>. The process is in <code>DEVLOG.md</code>. This page just lays them out.",
       "example-stamp": "EXAMPLE",
-      title: "White box · CGDD",
+      title: "Stray Rat · CGDD",
       description: "CGDD student site: script framework, change log, and the playable.",
       "lang-label": "Language"
     }
