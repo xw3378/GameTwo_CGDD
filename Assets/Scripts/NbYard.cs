@@ -252,7 +252,7 @@ internal static class NbYard
     static void Bush(Transform p, string n, float x, float z, float d)
     {
         // 主球是实体的：它既是视觉主体，也是保安视线的遮挡物。
-        Nb.Ball(p, n, new Vector3(x, d * 0.30f, z), d, BushA, true);
+        Nb.Ball(p, n, new Vector3(x, d * 0.30f, z), d, BushA, false);
         // 两个小一点的副球不挡人，只是把轮廓打碎，别让灌木看起来像一个台球。
         Nb.Ball(p, n + " b", new Vector3(x + d * 0.26f, d * 0.20f, z + d * 0.18f), d * 0.66f, BushB, false);
         Nb.Ball(p, n + " c", new Vector3(x - d * 0.22f, d * 0.16f, z - d * 0.20f), d * 0.58f, BushB, false);

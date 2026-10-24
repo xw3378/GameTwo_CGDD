@@ -38,8 +38,8 @@ internal class NbMap : MonoBehaviour
 
     static readonly Color CardBg = new Color(0.08f, 0.08f, 0.09f, 0.74f);
     static readonly Color LineCol = new Color(0.86f, 0.80f, 0.66f, 0.55f);
-    static readonly Color BlockCol = new Color(0.62f, 0.62f, 0.64f, 0.92f);
-    static readonly Color CheeseCol = new Color(1.00f, 0.84f, 0.26f, 1f);
+    static readonly Color BlockCol = new Color(0.62f, 0.62f, 0.64f, 0.65f);
+    static readonly Color CheeseCol = new Color(255f, 255f, 0f);
     // 层号方块的配色：本层是实心金 + 近黑字，别层是暗铜 + 金字。
     // 冰箱七层在俯视图上会叠成一团：全亮等于一片金点糊在中间；全暗又等于
     // "定位器上根本没有它"。但只靠亮度分"本层/别层"仍然回答不了
@@ -53,7 +53,7 @@ internal class NbMap : MonoBehaviour
     // 后院：保安点。暖金 = 手电还亮着、在巡逻；红 = 已经看见你、正在追。
     // 猫从后院删掉之后，地图上不能一个威胁都没有 —— 这一关要求玩家算"往哪丛灌木跑 5 m"，
     // 看不见人在哪，那个计算就只能靠猜。
-    static readonly Color GuardCol = new Color(1.00f, 0.80f, 0.42f, 1f);
+    static readonly Color GuardCol = new Color(0.8f, 0.4f, 0.05f, 1f); 
     static readonly Color GuardHotCol = new Color(1.00f, 0.26f, 0.16f, 1f);
     static readonly Color SelfCol = new Color(0.55f, 0.93f, 1.00f, 1f);
     static readonly Color StairCol = new Color(0.34f, 0.62f, 0.78f, 0.55f);
