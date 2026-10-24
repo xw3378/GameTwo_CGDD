@@ -69,6 +69,7 @@ internal class NbMap : MonoBehaviour
     Image _self;
     float _arrowAng;        // 当前箭头角度（度，0 = 屏幕正上方 = 世界 −z）
     bool _arrowInit;        // 第一帧直接就位，别从 0° 转过来
+    TextMeshProUGUI shelfText;
 
     internal static NbMap Create()
     {
@@ -358,10 +359,11 @@ internal class NbMap : MonoBehaviour
         // 缺字形是"静默空白"，不会报错（见 memory）。
         if (NbScene.Kind == NbSceneKind.Fridge)
         {
-            TextMeshProUGUI lg = NbUi.Text("Legend", card,
-                "NUMBER = SHELF  (1 = BOTTOM)", 14f,
+            
+            shelfText = NbUi.Text("Legend", card,
+                "SHELF: 1", 14f,
                 new Color(1f, 1f, 1f, 0.60f), TextAlignmentOptions.BottomLeft);
-            AnchorLeft(lg.rectTransform, new Vector2(MapX0, MapY0 + NbScene.Depth * K + 12f),
+            AnchorLeft(shelfText.rectTransform, new Vector2(MapX0, MapY0 + NbScene.Depth * K + 12f),
                 new Vector2(280f, 18f));
         }
 
@@ -582,10 +584,12 @@ internal class NbMap : MonoBehaviour
 
             int shelf = NbFridge.ShelfOf(c.transform.position.y);
             bool here = shelf == myShelf;
+            
 
             dot.color = here ? CheeseCol : ChipFarBg;
             if (num != null)
             {
+                shelfText.text = "SHELF: " + shelf.ToString();
                 num.text = shelf.ToString();
                 num.color = here ? ChipInk : ChipFarInk;
             }
