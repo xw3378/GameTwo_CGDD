@@ -90,7 +90,7 @@ internal class NbMap : MonoBehaviour
 
     static Vector2 ToMap(float x, float z)
     {
-        return new Vector2(MapX0 + (x - NbScene.XMin) * K, MapY0 + (NbScene.ZMax - z) * K);
+        return new Vector2(MapX0 + (NbScene.XMax - x) * K, MapY0 + (NbScene.ZMax - z) * K);
     }
 
     // ── 场景专属地形（地图要看得出"哪里不能走"）──
@@ -212,8 +212,8 @@ internal class NbMap : MonoBehaviour
         AnchorRight(size.rectTransform, new Vector2(-20f, CardH - 34f), new Vector2(200f, 24f));
 
         // ── 地面底色（街区范围）──
-        Vector2 a = ToMap(NbScene.XMin, NbScene.ZMax);
-        Vector2 b = ToMap(NbScene.XMax, NbScene.ZMin);
+        Vector2 a = ToMap(NbScene.XMax, NbScene.ZMax);
+        Vector2 b = ToMap(NbScene.XMin, NbScene.ZMin);
         RectTransform field = NbUi.Rect("Field", card);
         field.anchorMin = field.anchorMax = field.pivot = new Vector2(0f, 0f);
         field.anchoredPosition = a;
@@ -643,9 +643,9 @@ internal class NbMap : MonoBehaviour
             Vector3 h = g.Heading;
             if (h.sqrMagnitude < 1e-4f) h = NbScene.Forward;
 
-            // 屏幕上方 = 世界 −z，所以是 Atan2(−x, −z)：
-            // 朝 −z ⇒ 0°（正上），朝 +x ⇒ −90°（转成顺时针 90°，指向右）。
-            float want = Mathf.Atan2(-h.x, -h.z) * Mathf.Rad2Deg;
+            // 屏幕上方 = 世界 −z，且地图左右翻转过，所以是 Atan2(x, −z)：
+            // 朝 −z ⇒ 0°（正上），朝 +x ⇒ +90°（指向左），朝 −x ⇒ −90°（指向右）。
+            float want = Mathf.Atan2(h.x, -h.z) * Mathf.Rad2Deg;
 
             // 按**角度**插值，不按向量。向量插值在两个方向接近相反时走哪边不确定，
             // 旧代码只好用 Dot<0 直接跳过去 —— 快速环视时能看见箭头"啪"地掉一格。

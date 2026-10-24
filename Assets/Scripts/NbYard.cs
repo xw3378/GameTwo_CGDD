@@ -202,11 +202,11 @@ internal static class NbYard
 
         // 后门 + 门前的两级台阶（台阶是装饰，不挡人）
         Nb.Box(p, "Back Door", new Vector3(CX, 1.05f, ZMax - 0.03f),
-            new Vector3(1.10f, 2.10f, 0.10f), Door, false);
+            new Vector3(1.10f, 2.10f, 0.10f), Door, true);
         Nb.Box(p, "Step Low", new Vector3(CX, 0.07f, ZMax - 0.55f),
-            new Vector3(1.60f, 0.14f, 0.90f), WallCap, false);
+            new Vector3(1.60f, 0.14f, 0.90f), WallCap, true);
         Nb.Box(p, "Step High", new Vector3(CX, 0.16f, ZMax - 0.20f),
-            new Vector3(1.30f, 0.10f, 0.50f), WallCap, false);
+            new Vector3(1.30f, 0.10f, 0.50f), WallCap, true);
 
         // 两扇窗（自发光的暗黄）：夜里给北侧一点可辨的方向
         for (int i = 0; i < 2; i++)
@@ -294,7 +294,7 @@ internal static class NbYard
         for (int i = 0; i < xs.Length; i++)
         {
             Nb.Box(p, "Bed " + i, new Vector3(xs[i], 0.10f, -47f),
-                new Vector3(3.6f, 0.20f, 1.4f), Soil, false);
+                new Vector3(3.6f, 0.20f, 1.4f), Soil, true);
             Nb.Box(p, "Bed " + i + " Crop", new Vector3(xs[i], 0.22f, -47f),
                 new Vector3(3.2f, 0.10f, 1.0f), BushB, false);
         }

@@ -226,9 +226,9 @@ public static class NbBuilder
             float gx = grates[i, 0], gz = grates[i, 1];
             float top = (Mathf.Abs(gx - Nb.VAcx) < 3f || Mathf.Abs(gx - Nb.VBcx) < 3f) ? 0.048f : 0.044f;
             Nb.Box(p, "Grate " + i, new Vector3(gx, top + 0.007f, gz),
-                new Vector3(0.56f, 0.014f, 0.56f), Iron, false);
+                new Vector3(0.56f, 0.014f, 0.56f), Iron, true);
             Nb.Box(p, "Grate Rim " + i, new Vector3(gx, top + 0.004f, gz),
-                new Vector3(0.68f, 0.008f, 0.68f), new Color(0.30f, 0.29f, 0.27f), false);
+                new Vector3(0.68f, 0.008f, 0.68f), new Color(0.30f, 0.29f, 0.27f), true);
         }
 
         Debug.LogFormat("[Nb] 地面细节：{0} 个石子/裂纹/落叶 + {1} 个井盖（全部无碰撞、Ignore Raycast 层）。",
@@ -299,7 +299,7 @@ public static class NbBuilder
         root.SetParent(p, false);
         root.localPosition = at;
 
-        Nb.Cyl(root, "Pole", new Vector3(0f, 1.7f, 0f), 0.14f, 3.4f, Iron, false);
+        Nb.Cyl(root, "Pole", new Vector3(0f, 1.7f, 0f), 0.14f, 3.4f, Iron, true);
         Nb.Box(root, "Arm", new Vector3(side * 0.45f, 3.32f, 0f), new Vector3(0.9f, 0.1f, 0.1f), Iron, false);
         Nb.Box(root, "Head", new Vector3(side * 0.9f, 3.2f, 0f), new Vector3(0.42f, 0.16f, 0.26f), Iron, false);
         // 灯罩玻璃要自发光：夜里布光是暗的，靠材质自己亮才看得出"灯是开的"
@@ -337,7 +337,7 @@ public static class NbBuilder
         root.SetParent(p, false);
         root.localPosition = at;
 
-        Nb.Cyl(root, "Trunk", new Vector3(0f, 1.3f * k, 0f), 0.34f * k, 2.6f * k, Trunk);
+        Nb.Cyl(root, "Trunk", new Vector3(0f, 1.3f * k, 0f), 0.34f * k, 2.6f * k, Trunk, true);
         Nb.Ball(root, "Crown A", new Vector3(0f, 3.5f * k, 0f), 3.1f * k, (seed & 1) == 0 ? LeafA : LeafB, false);
         Nb.Ball(root, "Crown B", new Vector3(0.5f * ((seed % 3) - 1), 4.35f * k, 0.4f * ((seed % 4) - 1.5f)),
             2.05f * k, (seed & 1) == 0 ? LeafB : LeafA, false);
@@ -360,7 +360,7 @@ public static class NbBuilder
             Transform root = new GameObject("Bin " + i).transform;
             root.SetParent(p, false);
             root.localPosition = bins[i];
-            Nb.Cyl(root, "Body", new Vector3(0f, 0.55f, 0f), 0.86f, 1.1f, BinCol);
+            Nb.Cyl(root, "Body", new Vector3(0f, 0.55f, 0f), 0.86f, 1.1f, BinCol, true);
             Nb.Cyl(root, "Lid", new Vector3(0f, 1.14f, 0f), 0.94f, 0.08f, Iron);
         }
 
@@ -376,7 +376,7 @@ public static class NbBuilder
             Transform root = new GameObject("Planter " + i).transform;
             root.SetParent(p, false);
             root.localPosition = planters[i];
-            Nb.Box(root, "Box", new Vector3(0f, 0.28f, 0f), new Vector3(1.5f, 0.56f, 0.8f), WallCap);
+            Nb.Box(root, "Box", new Vector3(0f, 0.28f, 0f), new Vector3(1.5f, 0.56f, 0.8f), WallCap, true);
             Nb.Box(root, "Soil", new Vector3(0f, 0.57f, 0f), new Vector3(1.3f, 0.06f, 0.62f), new Color(0.24f, 0.18f, 0.13f), false);
             for (int b = 0; b < 3; b++)
                 Nb.Ball(root, "Bush " + b, new Vector3(-0.42f + b * 0.42f, 0.74f, 0f), 0.62f, LeafB, false);
