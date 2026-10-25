@@ -324,8 +324,8 @@ internal class NbHud : MonoBehaviour
         _hpText = NbUi.Text("Value", hpCard, "100 / 100", 22f, Cream, TextAlignmentOptions.TopRight);
         Place(_hpText.rectTransform, new Vector2(152f, -12f), new Vector2(146f, 26f));
 
-        // 10 格：宽 (276 - 9*3) / 10 = 24.9，节距 27.9
-        const float segW = 24.9f, segGap = 3f;
+        // 10 格：宽 (276 - 9*3) / 5 = 50，节距 27.9
+        const float segW = 50f, segGap = 3f;
         for (int i = 0; i < _hpSegs.Length; i++)
         {
             // 用纯白方块而不是圆角图：这是一排"电池格"，圆角切开后每格只剩两条竖边，
@@ -359,7 +359,7 @@ internal class NbHud : MonoBehaviour
 
         // ── 操作提示（左下角）──
         // 宽度压到 620：旧版 1040 会横穿屏幕中央，被曝光条压住一半。
-        TextMeshProUGUI hint = NbUi.Text("Hint", c, "WASD  MOVE     SHIFT  RUN     SPACE  JUMP     Q E  TURN", 18f,
+        TextMeshProUGUI hint = NbUi.Text("Hint", c, "WASD - MOVE     SHIFT - RUN     SPACE - JUMP     Q/E - TURN     ENTER - MAIN MENU", 18f,
             new Color(1f, 1f, 1f, 0.42f), TextAlignmentOptions.BottomLeft);
         RectTransform hr = hint.rectTransform;
         hr.anchorMin = hr.anchorMax = hr.pivot = new Vector2(0f, 0f);
@@ -480,7 +480,7 @@ internal class NbHud : MonoBehaviour
         _endSub = NbUi.Text("Sub", root, "", 26f, Cream, TextAlignmentOptions.Center);
         PlaceCenter(_endSub.rectTransform, new Vector2(0f, 6f), new Vector2(720f, 40f));
 
-        _endKey = NbUi.Text("Key", root, "PRESS  R  TO  CONTINUE", 24f, Dim, TextAlignmentOptions.Center);
+        _endKey = NbUi.Text("Key", root, "PRESS  R  TO  CONTINUE  /  PRESS M TO RETURN TO MAIN MENU", 24f, Dim, TextAlignmentOptions.Center);
         PlaceCenter(_endKey.rectTransform, new Vector2(0f, -74f), new Vector2(720f, 36f));
 
         _endRoot = root.gameObject;
@@ -563,8 +563,8 @@ internal class NbHud : MonoBehaviour
         // 一格 = 一口 = BiteDamage 点。满血全亮，掉血从右往左灭 —— 读起来就是"被咬掉一块"。
         int bite = Mathf.Max(1, NbLevels.BiteDamage);
         int live = Mathf.Clamp(g.Hp / bite, 0, _hpSegs.Length);
-        Color segOn = live >= 7 ? new Color(0.55f, 0.78f, 0.42f, 1f)
-                    : live >= 4 ? new Color(0.98f, 0.74f, 0.28f, 1f)
+        Color segOn = live >= (_hpSegs.Length * 2 / 3) ? new Color(0.55f, 0.78f, 0.42f, 1f)
+                    : live >= Mathf.Max(1, (_hpSegs.Length / 3)) ? new Color(0.98f, 0.74f, 0.28f, 1f)
                                 : new Color(0.92f, 0.28f, 0.22f, 1f);
         for (int i = 0; i < _hpSegs.Length; i++)
         {

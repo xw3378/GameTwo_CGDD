@@ -299,6 +299,13 @@ internal class NbPlayer : MonoBehaviour
                 if (kb.qKey.isPressed) turn -= 1f;
                 if (kb.eKey.isPressed) turn += 1f;
                 if (turn != 0f) Yaw += turn * 100f * dt;
+
+                if (kb.enterKey.isPressed)
+                {
+                    NbSceneSelect.Show();
+                    AcceptInput = false;
+                    return;
+                }
             }
 
             transform.rotation = Quaternion.Euler(0f, Yaw, 0f);

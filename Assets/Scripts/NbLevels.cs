@@ -53,7 +53,7 @@ internal static class NbLevels
     /// 每被抓一次扣多少血。100 血 ⇒ 一关之内最多被咬 10 口。
     internal const int BiteDamage = 10;
 
-    internal const int StartHp = 100;
+    internal const int StartHp = 50;
 
     // ───────────────────────── 01 居民街区 ─────────────────────────
     // 两条曲线分开走：奶酪 = 关卡数 + 1（封顶 10），猫 = 关卡数（封顶 10）。

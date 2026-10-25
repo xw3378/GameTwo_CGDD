@@ -706,7 +706,18 @@ internal class NbGame : MonoBehaviour
             // 过关 / 失败都停在这里等一个 R：过关进下一关，失败重打本关，通关之后从第 1 关重来。
             // 不自动跳关是刻意的 —— 被抓死和过关都用同一块面板，自动推进会让"我刚才是不是死了"
             // 变成一个需要回想的问题。
-            if (kb != null && kb.rKey.wasPressedThisFrame) NextOrRetry();
+            if (kb != null && kb.rKey.wasPressedThisFrame) {
+                NextOrRetry();
+                return;
+            }
+
+            if (kb != null && kb.mKey.wasPressedThisFrame) //return to main menu
+            {
+                Rig.AcceptInput = false;
+                NbSceneSelect.Show();
+                return;
+            }
+
             return;
         }
         if (Player == null) return;
@@ -1314,11 +1325,11 @@ internal class NbGame : MonoBehaviour
             if (last)
                 NbHud.I.ShowEnd(NbScene.Code + " CLEARED",
                     CheeseNeeded + " OF " + CheeseNeeded + " BROUGHT BACK.  " + NbScene.Name + " IS QUIET.",
-                    "PRESS  R  TO  PLAY  AGAIN", true);
+                    "PRESS R TO PLAY AGAIN   /   PRESS M TO RETURN TO MAIN MENU", true);
             else
                 NbHud.I.ShowEnd("LEVEL " + Level + " CLEAR",
                     CheeseNeeded + " OF " + CheeseNeeded + " BROUGHT BACK.  NEXT IS LEVEL " + (Level + 1) + ".",
-                    "PRESS  R  TO  CONTINUE", true);
+                    "PRESS R TO CONTINUE   /   PRESS M TO RETURN TO MAIN MENU", true);
         }
 
         Debug.LogFormat("[Nb] 第 {0} 关通过（生命 {1}/{2}）。{3}",
@@ -1348,7 +1359,7 @@ internal class NbGame : MonoBehaviour
         if (NbHud.I != null)
             NbHud.I.ShowEnd(cause,
                 "OUT OF HEALTH ON LEVEL " + Level + ".",
-                "PRESS  R  TO  TRY  AGAIN", false);
+                "PRESS R TO TRY AGAIN  /  PRESS M TO RETURN TO MAIN MENU", false);
 
         Debug.LogFormat("[Nb] 生命归零 —— 第 {0} 关失败（本关奶酪 {1}/{2}）。", Level, Collected, CheeseNeeded);
     }
