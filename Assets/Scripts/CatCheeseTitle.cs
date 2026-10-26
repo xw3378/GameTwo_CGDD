@@ -66,7 +66,7 @@ internal class CatCheeseTitle : MonoBehaviour
     public int sortingOrder = 200;          // 压过 HUD(50) 和结算层(100)
     public float inputDelay = 0.45f;        // 防误触：刚进来先不响应输入
 
-    public float autoStartAfter = 12f;      // 没人操作就自己开始（0 = 永不自动开始）
+    public float autoStartAfter = 0f;       // 0 = 永不自动开始（标题页只等玩家点开始 / 按任意键）
 
     static bool _shownOnce;
     static CatCheeseTitle _instance;
