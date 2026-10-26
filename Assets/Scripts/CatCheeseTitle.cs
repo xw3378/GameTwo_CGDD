@@ -264,6 +264,7 @@ internal class CatCheeseTitle : MonoBehaviour
         Cursor.visible = true;
 
         Time.timeScale = 1f;
+        NbProgress.ClearAll();
 
         NbSceneSelect.Show();
         StartCoroutine(FadeOut());

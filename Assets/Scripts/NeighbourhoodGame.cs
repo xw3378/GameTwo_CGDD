@@ -189,7 +189,7 @@ internal class NbGame : MonoBehaviour
         if (NbHud.I == null) NbHud.Create();
         if (NbMap.I == null) NbMap.Create();
 
-        LoadLevel(1);
+        LoadLevel(NbProgress.Best(NbScene.Kind));
 
         // 冰箱：先讲规则再放人。它同时会冻结玩家和**门**（DoorUpdate 里第一句就 return）——
         // 只冻玩家不冻门的话，玩家读完规则的第一秒就是门开的时候。
