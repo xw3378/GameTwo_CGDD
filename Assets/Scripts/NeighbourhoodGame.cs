@@ -1381,6 +1381,13 @@ internal class NbGame : MonoBehaviour
         LoadLevel(Level);
     }
 
+    /// 玩家闲置 3 秒的吱吱叫：通知全场保安（20 m 内的才会转过去看）。
+    internal void OnSqueak(Vector3 at)
+    {
+        for (int i = 0; i < Guards.Count; i++)
+            if (Guards[i] != null) Guards[i].HearNoise(at);
+    }
+
     // ───────────────────────── 换场景 ─────────────────────────
 
     bool _switching;

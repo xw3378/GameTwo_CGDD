@@ -6,6 +6,9 @@
 // @tune Half:float:2-45:beam cone half-angle deg
 // @tune Damage:float:1-100:exposure gained per second in the beam
 // @tune ChaseSpeed:float:1-6:chase speed m/s (below player run)
+// @tune CloseRange:float:1-10:distance within which the cone widens m
+// @tune CloseHalf:float:10-90:effective cone half-angle when close deg
+// @tune HearNoiseRange:float:5-50:hearing distance for the idle squeak m
 
 // NbGuard.cs — 夜巡保安（后院专属威胁）
 //
@@ -62,6 +65,14 @@ internal class NbGuard : MonoBehaviour
     internal float Range = 18f;         // 手电射程
     internal float Half = 11f;          // 光锥半角（度）
     internal float Damage = 25f;        // 每秒累积多少曝光（满 100 被抓）
+
+    /// 近身放宽光锥：灯在 ~1.2 m 高、玩家只有 0.3 m 高，11° 的锥在 4 m 内照不到脚边的人，
+    /// 于是"贴身了反而看不见"。4 m 以内把有效半角放宽到 35°。
+    internal const float CloseRange = 4f;     // 这个距离以内放宽判定（米）
+    internal const float CloseHalf = 35f;     // 近身有效半角（度）
+
+    /// 能听见吱吱叫（玩家闲置 3 秒）的距离。和脚步声共用 20 m 这个"听得到"的尺度。
+    internal const float HearNoiseRange = 20f;
 
     // ── 不规则游走 ──
     /// 巡逻区半宽：航点在这条路线两侧各 ZonePad 米之内抽。
@@ -558,7 +569,9 @@ internal class NbGuard : MonoBehaviour
         float dist = to.magnitude;
 
         if (dist < 0.05f || dist > Range) return;
-        if (Vector3.Angle(_lamp.forward, to) > Half) return;
+        // 近身时放宽光锥（见 CloseRange / CloseHalf），否则灯高 + 人矮，贴身反而照不到。
+        float half = dist < CloseRange ? CloseHalf : Half;
+        if (Vector3.Angle(_lamp.forward, to) > half) return;
 
         // 被掩体挡住 ⇒ 看不见。射线短 0.15 m，免得终点落在玩家皮肤上还算"被挡"。
         RaycastHit hit;
@@ -648,6 +661,31 @@ internal class NbGuard : MonoBehaviour
         _hasWp = false;
         _pause = 1.0f;
         _lookT = 0f;
+    }
+
+    /// 听到吱吱叫（玩家闲置 3 秒）时转向声源：站住、转身、灯指过去看一会儿。
+    /// 只转身，不直接"看见"—— Sense() 的光锥 + 射线照常生效，躲得好就不算被发现。
+    internal void HearNoise(Vector3 pos)
+    {
+        if (_chasing) return;
+        if (_lamp == null) return;
+
+        Vector3 d = pos - transform.position;
+        d.y = 0f;
+        if (d.sqrMagnitude < 1e-4f || d.sqrMagnitude > HearNoiseRange * HearNoiseRange) return;
+
+        float yaw = Mathf.Atan2(d.x, d.z) * Mathf.Rad2Deg;
+        _bodyYawWant = yaw;
+        transform.rotation = Quaternion.Euler(0f, yaw, 0f);
+
+        float flat = Mathf.Sqrt(d.sqrMagnitude);
+        float dy = (pos.y + 0.10f) - _lamp.position.y;
+        _scanYaw = _scanYawWant = 0f;
+        _scanPitch = _scanPitchWant = Mathf.Atan2(-dy, flat) * Mathf.Rad2Deg;
+
+        _holdT = 1.0f;      // 灯盯住声源 1 秒
+        _lookT = 1.2f;      // 身体也保持朝向，别被 LookAround 立刻换掉
+        _pause = 1.2f;      // 先站住（LookAround 接手）
     }
 
     static float Norm180(float a)

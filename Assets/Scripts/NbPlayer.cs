@@ -388,6 +388,8 @@ internal class NbPlayer : MonoBehaviour
             {
                 _idleT = 0f;
                 AudioManager.PlaySqueak();
+                NbGame game = NbGame.I;
+                if (game != null) game.OnSqueak(transform.position);
             }
         }
     }
