@@ -34,33 +34,28 @@ internal static class NbRubbish
     const string ArtName    = "Rubbish Art";     // 换皮产物的名字；同时当"已经换过"的记号
 
     // ───────────────────────── 配色 ─────────────────────────
-    // 基调压得比较暗：这一关是夜里，灰白楼体已经占了亮部，
-    // 垃圾一旦跟着变亮就会抢主体，而且垃圾本来就该是画面里最脏的一块。
-    // 但暗 ≠ 全挤在同一档，具体理由见下面那条。
-
-    // 🔴 第 5 版渲染（/tmp/nb_shots_before/B_alley_west.png）暴露的问题：
-    // 所有袋子挤在 0.14…0.285 这一档，夜灯只照亮朝灯的那一小片，其余全塌进暗部，
-    // 整堆读成"一坨被磨圆的黑色石头"，数不出第二只袋子。
-    // 现在把亮度拉开到 0.075…0.46，并单独留两只"晒白的塑料袋"——
-    // 它们本身不亮，但比邻居亮两档，剪影边缘就有了可数的台阶。
-    static readonly Color BagA   = new Color(0.075f, 0.079f, 0.086f);   // 最深的黑袋子，垫在缝里做"洞"
-    static readonly Color BagB   = new Color(0.138f, 0.130f, 0.116f);   // 旧袋子，偏褐
-    static readonly Color BagC   = new Color(0.224f, 0.228f, 0.219f);   // 蒙了灰的袋子
-    static readonly Color BagD   = new Color(0.318f, 0.302f, 0.268f);   // 晒白了的编织袋
-    static readonly Color BagE   = new Color(0.442f, 0.450f, 0.432f);   // 脏白塑料袋（只在少数几处）
-    static readonly Color BagF   = new Color(0.455f, 0.398f, 0.286f);   // 编织袋，偏黄
-    static readonly Color Card   = new Color(0.330f, 0.252f, 0.156f);   // 纸板
-    static readonly Color CardB  = new Color(0.255f, 0.190f, 0.118f);   // 湿过/压旧的纸板
-    static readonly Color Tape   = new Color(0.520f, 0.480f, 0.380f);   // 胶带
-    static readonly Color Wood   = new Color(0.330f, 0.262f, 0.176f);   // 托盘木条
-    static readonly Color SkipBody = new Color(0.185f, 0.235f, 0.200f); // 垃圾箱的墨绿漆
-    static readonly Color SkipRim  = new Color(0.300f, 0.305f, 0.285f); // 磨掉漆的箱口
-    static readonly Color Iron   = new Color(0.085f, 0.088f, 0.090f);   // 轮子/铁件
-    static readonly Color TarpBlue = new Color(0.135f, 0.165f, 0.205f); // 蓝色防雨布
-    static readonly Color Alu    = new Color(0.480f, 0.500f, 0.490f);   // 易拉罐
-    static readonly Color GlassG = new Color(0.110f, 0.215f, 0.115f);   // 绿玻璃
-    static readonly Color GlassB = new Color(0.190f, 0.130f, 0.070f);   // 棕玻璃
-    static readonly Color Paper  = new Color(0.520f, 0.505f, 0.470f);   // 湿纸
+    // 夜里暗巷里，垃圾堆一度灰扑扑的、和路面糊成一块。现在把整堆染成**彩虹**：
+    // 红/橙/黄/绿/青/蓝/紫一档一档铺开。明度再压低一档、饱和度保持高位 ——
+    // 要的是"又艳又脏"：色相够跳、能和暗巷拉开对比，却几乎不反光、不干净，
+    // 像在泥里滚过一圈的彩垃圾。最艳的那几只袋子（BagC 黄 / BagE 青）相对亮两档，剪影边缘才有可数的台阶。
+    static readonly Color BagA   = new Color(0.250f, 0.035f, 0.030f);   // 脏红袋子
+    static readonly Color BagB   = new Color(0.320f, 0.120f, 0.030f);   // 脏橙袋子
+    static readonly Color BagC   = new Color(0.340f, 0.280f, 0.030f);   // 脏黄袋子（相对最艳）
+    static readonly Color BagD   = new Color(0.080f, 0.240f, 0.050f);   // 脏绿袋子
+    static readonly Color BagE   = new Color(0.035f, 0.220f, 0.210f);   // 脏青/水鸭袋子
+    static readonly Color BagF   = new Color(0.060f, 0.090f, 0.290f);   // 脏蓝袋子
+    static readonly Color Card   = new Color(0.280f, 0.140f, 0.035f);   // 纸板（橙褐）
+    static readonly Color CardB  = new Color(0.220f, 0.110f, 0.030f);   // 湿过/压旧的纸板
+    static readonly Color Tape   = new Color(0.360f, 0.290f, 0.035f);   // 胶带（脏黄）
+    static readonly Color Wood   = new Color(0.240f, 0.130f, 0.035f);   // 托盘木条（褐）
+    static readonly Color SkipBody = new Color(0.210f, 0.055f, 0.290f); // 垃圾箱（脏紫）
+    static readonly Color SkipRim  = new Color(0.250f, 0.180f, 0.310f); // 磨掉漆的箱口（灰紫）
+    static readonly Color Iron   = new Color(0.100f, 0.100f, 0.130f);   // 轮子/铁件（青黑）
+    static readonly Color TarpBlue = new Color(0.100f, 0.070f, 0.320f); // 防雨布（蓝紫）
+    static readonly Color Alu    = new Color(0.290f, 0.340f, 0.390f);   // 易拉罐（钢青）
+    static readonly Color GlassG = new Color(0.070f, 0.290f, 0.100f);   // 绿玻璃
+    static readonly Color GlassB = new Color(0.055f, 0.130f, 0.340f);   // 蓝玻璃
+    static readonly Color Paper  = new Color(0.410f, 0.390f, 0.340f);   // 湿纸（脏白）
 
     // ───────────────────────── 入口 ─────────────────────────
 
@@ -469,9 +464,8 @@ internal static class NbRubbish
             Quaternion.Euler(Random.Range(-4f, 4f), Random.value * 360f, Random.Range(-4f, 4f)), mat);
     }
 
-    /// 通道内衬的配色：**只许深色三种**。
-    /// 洞里本来就该比外面暗；一只 0.9 m 的脏白袋贴在 0.5 m 处，会把半个画面变成一面发亮的墙
-    /// （渲染 T6 里右边那块"大纸板"其实就是它）。留一档 BagA 做反差，不至于整条洞糊成一块黑。
+    /// 通道内衬的配色：沿用整堆的彩虹袋，但只取较暗的三档（BagA/BagB/BagC）。
+    /// 洞里本来就该比外面暗，太艳的袋子会变成一面发亮的墙，还抢洞口外垃圾堆的视线。
     static Material BurrowColor(int i)
     {
         switch (((i % 4) + 4) % 4)
@@ -657,7 +651,7 @@ internal static class NbRubbish
         // 盖子掀开：一侧压在箱口、一侧翘起来。
         // 🔴 用箱体色而不是箱口色：箱口那档（0.215）在夜景里会被路灯打得发白，
         // 铺在箱顶就是一整块"浅灰水泥板"（第一版渲染里非常抢眼，完全不像铁皮）。
-        Material lid = MatOf(new Color(0.205f, 0.250f, 0.215f), 0.30f, 0.35f);
+        Material lid = MatOf(new Color(0.250f, 0.080f, 0.340f), 0.30f, 0.35f);
         Piece(root, PrimitiveType.Cube, "Lid", new Vector3(len * 0.30f, hgt * 1.06f, 0f),
             new Vector3(len * 0.66f, hgt * 0.06f, wid * 1.10f),
             Quaternion.Euler(0f, 0f, -13f), lid);

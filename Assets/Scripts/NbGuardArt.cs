@@ -16,8 +16,8 @@
 //
 // 为什么不直接用 fbx 自带的材质：
 //   fbx 里只有两个空材质（Material.001 / Black.），**没有贴图**。默认导入在 URP 下是洋红或纯白，
-//   而这个角色在夜里应该是一块**比背景更黑**的剪影 —— 它靠手电的光锥被看见，不靠自身颜色。
-//   所以材质在这里重做：制服一份、鞋/头发一份，两件共用（SRP Batcher 还能合批）。
+//   所以材质在 Paint() 里重做：制服染成高饱和橙（夜里一眼认出"这是人"）、鞋/头发一份深色，
+//   两件共用（SRP Batcher 还能合批）。
 //
 // 已知的、只能靠 Play 验收的两件事（都留了日志）：
 //   ① 朝向。按骨骼绑定姿势算出来是标准 Mixamo 朝向（左肩在 +X、脚朝 +Z），默认就当它面朝 +Z。
@@ -221,10 +221,11 @@ internal static class NbGuardArt
 
     // ───────────────────────── 材质 ─────────────────────────
 
-    /// 夜里这个角色只该被"看成一块影子"：制服比背景更黑，鞋和头发再黑一档。
+    /// 制服染成高饱和橙：夜里靠这一块亮色和暗巷拉开对比，一眼认出"这是人"；
+    /// 鞋/头发仍是深色（fbx 里叫 Black. 的那份材质），轮廓不至于糊成一片。
     static void Paint(GameObject go)
     {
-        Material coat = Mat("GuardCoat", new Color(0.085f, 0.095f, 0.115f), 0.10f);
+        Material coat = Mat("GuardCoat", new Color(0.92f, 0.40f, 0.05f), 0.25f);
         Material boot = Mat("GuardBoot", new Color(0.040f, 0.042f, 0.048f), 0.05f);
 
         Renderer[] rs = go.GetComponentsInChildren<Renderer>(true);

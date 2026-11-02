@@ -490,13 +490,36 @@ internal static class NbFoodArt
         // URP/Lit 的主贴图槽是 _BaseMap、主色是 _BaseColor；mainTexture/color 这两个属性
         // 走的是 [MainTexture]/[MainColor] 特性，换 Standard 也照样能设对。
         m.mainTexture = tex;
-        m.color = Color.white;
+        Color tint = FoodTint(texPath);
+        m.color = tint;
+        if (m.HasProperty("_BaseColor")) m.SetColor("_BaseColor", tint);
         if (m.HasProperty("_Smoothness")) m.SetFloat("_Smoothness", 0.15f);
         if (m.HasProperty("_Metallic")) m.SetFloat("_Metallic", 0f);
         if (m.HasProperty("_Glossiness")) m.SetFloat("_Glossiness", 0.15f);
 
         _mats[key] = m;
         return m;
+    }
+
+    /// 给商品贴图染一层高饱和彩虹色，让冰箱里的货和垃圾堆一样"彩色又艳"。
+    /// 按贴图路径哈希取色 —— 同一种商品永远同一种颜色，每次进关一致。
+    static readonly Color[] FoodTints =
+    {
+        new Color(0.92f, 0.28f, 0.20f),   // 红
+        new Color(0.96f, 0.56f, 0.10f),   // 橙
+        new Color(0.94f, 0.88f, 0.20f),   // 黄
+        new Color(0.30f, 0.86f, 0.34f),   // 绿
+        new Color(0.16f, 0.74f, 0.74f),   // 青
+        new Color(0.26f, 0.46f, 0.96f),   // 蓝
+        new Color(0.72f, 0.32f, 0.92f),   // 紫
+    };
+
+    static Color FoodTint(string texPath)
+    {
+        if (string.IsNullOrEmpty(texPath)) return Color.white;   // 无贴图（面包/兜底）不染
+        int h = 0;
+        for (int i = 0; i < texPath.Length; i++) h = h * 31 + texPath[i];
+        return FoodTints[((h % FoodTints.Length) + FoodTints.Length) % FoodTints.Length];
     }
 
     // ───────────────────────── 碰撞体 ─────────────────────────

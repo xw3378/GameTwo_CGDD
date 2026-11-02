@@ -173,7 +173,7 @@ internal class NbGuard : MonoBehaviour
         GameObject model = NbGuardArt.Attach(go.transform);
         if (model == null)
         {
-            Color coat = new Color(0.10f, 0.11f, 0.14f);
+            Color coat = new Color(0.92f, 0.40f, 0.05f);
             Color skin = new Color(0.38f, 0.30f, 0.24f);
             Color cap  = new Color(0.07f, 0.08f, 0.10f);
 

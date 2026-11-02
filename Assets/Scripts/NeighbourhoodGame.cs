@@ -350,6 +350,7 @@ internal class NbGame : MonoBehaviour
             Renderer r = all[i];
             if (r == null || !r.enabled) continue;
             if (Player != null && r.transform.IsChildOf(Player)) continue;
+            if (SkipInProbe(r)) continue;   // 合并网格的草/杂草 + 粒子：包围盒圈住全场，见方法注释
 
             Bounds b = r.bounds;
             if (b.Contains(p))
@@ -397,6 +398,18 @@ internal class NbGame : MonoBehaviour
             Debug.LogErrorFormat("[Nb] 镜头 1 m 内就顶着「{0}」—— 除 HUD 外整屏都会是它，跟走不走得动无关。", f1.name);
         if (inside > 0)
             Debug.LogErrorFormat("[Nb] 相机站在 {0} 个物体的包围盒内部（{1}）—— 看到的是它们的背面，整屏一片平涂色。", inside, insideNames);
+    }
+
+    /// 自检要判的是"镜头是不是顶着**实墙/实心道具**"。两类东西的包围盒会误报，一律跳过：
+    ///   · NbDetail 的草/杂草是整片场地并成一个网格，单只 Renderer 的包围盒圈住全场；
+    ///   · 粒子（冷气 Cold Mist 等）是透明的告示牌，包围盒是整片发射区，永远不会挡住视线。
+    static bool SkipInProbe(Renderer r)
+    {
+        if (r == null) return false;
+        if (r is ParticleSystemRenderer) return true;
+        string n = r.name;
+        return n.EndsWith("Weeds", System.StringComparison.Ordinal)
+            || n.EndsWith("Tufts", System.StringComparison.Ordinal);
     }
 
     // ───────────────────────── 出生点 ─────────────────────────

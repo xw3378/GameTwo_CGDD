@@ -40,22 +40,32 @@ internal static class NbYard
     internal static readonly Vector3 Forward = new Vector3(0f, 0f, 1f);
 
     // ───────────────────────── 调色板 ─────────────────────────
-    // 整体比街区更黑更绿：月光下草坪是墨绿，砖墙是发灰的暗红。
+    // 底色仍是夜里的墨绿/暗土，但地标与围墙都染成了"深青绿墙 + 彩虹暗色点缀"——
+    // 和垃圾堆同一套"艳但脏"的用色，夜里靠颜色而不是亮度去分辨地标。
     static readonly Color Grass   = new Color(0.13f, 0.19f, 0.12f);
     static readonly Color Dirt    = new Color(0.22f, 0.18f, 0.14f);
-    static readonly Color WallCol = new Color(0.24f, 0.19f, 0.17f);
+    static readonly Color WallCol = new Color(0.05f, 0.22f, 0.23f);   // 深青绿砖墙
     static readonly Color WallCap = new Color(0.31f, 0.27f, 0.23f);
     static readonly Color HouseCol = new Color(0.20f, 0.19f, 0.19f);
-    static readonly Color Door    = new Color(0.09f, 0.07f, 0.06f);
+    static readonly Color Door    = new Color(0.28f, 0.07f, 0.30f);   // 深紫门（原来近黑）
     static readonly Color BushA   = new Color(0.13f, 0.22f, 0.13f);
     static readonly Color BushB   = new Color(0.17f, 0.28f, 0.16f);
     static readonly Color BinA    = new Color(0.14f, 0.16f, 0.15f);
     static readonly Color BinB    = new Color(0.11f, 0.13f, 0.12f);
-    static readonly Color Wood    = new Color(0.20f, 0.15f, 0.10f);
-    static readonly Color RoofCol = new Color(0.16f, 0.13f, 0.11f);
-    static readonly Color ShedCol = new Color(0.17f, 0.16f, 0.14f);
+    static readonly Color Wood    = new Color(0.34f, 0.15f, 0.05f);   // 深橙柴垛
+    static readonly Color RoofCol = new Color(0.34f, 0.28f, 0.05f);   // 深黄木顶
+    static readonly Color ShedCol = new Color(0.12f, 0.26f, 0.30f);   // 深青棚
     static readonly Color Cloth   = new Color(0.34f, 0.33f, 0.31f);
     static readonly Color Soil    = new Color(0.15f, 0.12f, 0.09f);
+
+    // 地标点缀物的「彩虹暗色」：柱子/衣服/棚顶各取一档，和垃圾堆同款"艳但脏"。
+    static readonly Color PoleCol  = new Color(0.12f, 0.10f, 0.38f);   // 深蓝紫晾衣柱
+    static readonly Color ClothA   = new Color(0.34f, 0.10f, 0.08f);   // 深红衣
+    static readonly Color ClothB   = new Color(0.10f, 0.28f, 0.14f);   // 深绿衣
+    static readonly Color ClothC   = new Color(0.36f, 0.18f, 0.06f);   // 深橙衣
+    static readonly Color ShedRoof = new Color(0.30f, 0.10f, 0.12f);   // 深红棚顶
+    static readonly Color DogCol   = new Color(0.10f, 0.26f, 0.12f);   // 深绿狗屋
+    static readonly Color DogRoof  = new Color(0.30f, 0.09f, 0.34f);   // 深紫狗屋顶
 
     // ───────────────────────── 10 个目标点 ─────────────────────────
     // **反过来是刻意的**：街区的顺序是"离出生点由近到远"，后院也是 ——
@@ -239,14 +249,14 @@ internal static class NbYard
             new Vector3(2.9f, 0.14f, 1.7f), RoofCol, false);
 
         Nb.Box(p, "Dog House", new Vector3(56f, 0.75f, -10f),
-            new Vector3(2.2f, 1.50f, 2.0f), Wood, true);
+            new Vector3(2.2f, 1.50f, 2.0f), DogCol, true);
         Nb.Box(p, "Dog Roof", new Vector3(56f, 1.62f, -10f),
-            new Vector3(2.7f, 0.22f, 2.5f), RoofCol, false);
+            new Vector3(2.7f, 0.22f, 2.5f), DogRoof, false);
 
         Nb.Box(p, "Shed", new Vector3(44.5f, 1.05f, -17f),
             new Vector3(3.4f, 2.10f, 3.0f), ShedCol, true);
         Nb.Box(p, "Shed Roof", new Vector3(44.5f, 2.16f, -17f),
-            new Vector3(3.8f, 0.16f, 3.4f), RoofCol, false);
+            new Vector3(3.8f, 0.16f, 3.4f), ShedRoof, false);
     }
 
     static void Bush(Transform p, string n, float x, float z, float d)
@@ -293,17 +303,18 @@ internal static class NbYard
     {
         float hw = len * 0.5f;
         Nb.Box(p, n + " Post W", new Vector3(CX - hw, 1.10f, z),
-            new Vector3(0.14f, 2.20f, 0.14f), Wood, true);
+            new Vector3(0.14f, 2.20f, 0.14f), PoleCol, true);
         Nb.Box(p, n + " Post E", new Vector3(CX + hw, 1.10f, z),
-            new Vector3(0.14f, 2.20f, 0.14f), Wood, true);
+            new Vector3(0.14f, 2.20f, 0.14f), PoleCol, true);
         Nb.Box(p, n + " Rope", new Vector3(CX, 2.08f, z),
             new Vector3(len, 0.03f, 0.03f), Cloth, false);
 
+        Color[] shirts = { ClothA, ClothB, ClothC };
         for (int i = 0; i < 3; i++)
         {
             float x = CX - len * 0.30f + i * len * 0.28f;
             Nb.Box(p, n + " Cloth " + i, new Vector3(x, 1.58f, z),
-                new Vector3(0.75f, 0.95f, 0.04f), Cloth, false);
+                new Vector3(0.75f, 0.95f, 0.04f), shirts[i], false);
         }
     }
 
