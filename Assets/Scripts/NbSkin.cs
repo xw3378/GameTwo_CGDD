@@ -104,30 +104,136 @@ internal static class NbSkin
             done++;
         }
 
-        if (kind == NbSceneKind.Street) ToneBuildings(root);
+        // 楼体修缮扫全场（模型楼不在 World 容器下，见 ToneBuildings 注释）
+        if (kind == NbSceneKind.Street) ToneBuildings(null);
 
         Debug.LogFormat("[Nb] 材质换皮（{0}）：{1} 件贴图化，{2} 件保持纯色。", kind, done, skipped);
     }
 
     /// 两栋 FBX 楼的材质是纯白的（没有贴图），夜里读起来像"没上色的纸板"。
-    /// 这里只压暗它们的底色，不动贴图 —— 它们的 UV 是整栋展开的，
-    /// 硬套一张 1.2 m 的砖纹会得到"每层楼一块砖"，比白着更假。
+    ///
+    /// 废弃楼（abandoned_）的"building 1"槽其实是**主墙面**，而且模型自带照片贴图
+    /// （textures/building 1.jpeg）从没被挂上 —— 贴图拷贝在 Resources/BuildingTex 下，
+    /// 这里运行时给它换上一个带贴图的共享材质，整栋楼的窗洞、霉斑就出来了。
+    /// 旧版用 MaterialPropertyBlock 压暗 _BaseColor：MPB 是 per-renderer 的，
+    /// 会把同一渲染器上有贴图的槽（concrete / building 1 side）一起盖灰 —— 所以改成
+    /// **按槽换材质**，不再用 MPB。
+    ///
+    /// root 传 null 时扫**全场**渲染器 —— 模型楼（Street Models (auto)）是场景里
+    /// 已有的物体，不在运行时搭的 World 容器下，只扫 root 会一栋都碰不到。
     static void ToneBuildings(Transform root)
     {
-        int n = 0;
-        foreach (Renderer r in root.GetComponentsInChildren<Renderer>(true))
-        {
-            if (r == null || r.sharedMaterial == null) continue;
-            string m = r.sharedMaterial.name;
-            if (m != "building 1" && m != "hara_u1_v1") continue;
+        Renderer[] rs = root != null
+            ? root.GetComponentsInChildren<Renderer>(true)
+            : Object.FindObjectsByType<Renderer>(FindObjectsInactive.Include, FindObjectsSortMode.None);
 
-            MaterialPropertyBlock mpb = new MaterialPropertyBlock();
-            r.GetPropertyBlock(mpb);
-            mpb.SetColor("_BaseColor", new Color(0.30f, 0.29f, 0.27f));
-            r.SetPropertyBlock(mpb);
-            n++;
+        int front = 0, dimmed = 0, toned = 0;
+        foreach (Renderer r in rs)
+        {
+            if (r == null) continue;
+
+            Material[] arr = r.sharedMaterials;
+            bool changed = false;
+            for (int i = 0; i < arr.Length; i++)
+            {
+                if (arr[i] == null) continue;
+                string m = arr[i].name;
+                if (m == "building 1")          // 废弃楼主墙面：挂照片贴图
+                {
+                    arr[i] = AbandonedFront();
+                    changed = true;
+                    front++;
+                }
+                else if (m == "New Material" || m == "New Material 1")  // 有贴图的槽：夜间调暗
+                {
+                    arr[i] = NightClone(arr[i], 0.62f);
+                    changed = true;
+                    dimmed++;
+                }
+                else if (m.StartsWith("hara_u"))   // 工业仓库 8 槽：全部挂上自带的扫描贴图
+                {
+                    arr[i] = HaraMat(m);
+                    changed = true;
+                    toned++;
+                }
+            }
+            if (changed) r.sharedMaterials = arr;
         }
-        if (n > 0) Debug.LogFormat("[Nb] 纯白楼体压暗：{0} 件。", n);
+        if (front + dimmed + toned > 0)
+            Debug.LogFormat("[Nb] 楼体修缮：废弃楼主墙贴图 {0} 槽，侧墙/底座夜间调暗 {1} 槽，仓库贴图 {2} 槽。", front, dimmed, toned);
+    }
+
+    static readonly Dictionary<string, Material> HaraCache = new Dictionary<string, Material>();
+
+    /// 工业仓库（hara）：FBX 里引用的 8 张 *_diffuse.png 是作者机器上的绝对路径，
+    /// 从没导进过工程 ——  sharpen 版 jpeg 已拷到 Resources/BuildingTex/，
+    /// 这里按材质名（hara_u1_v1 … hara_u3_v2）逐槽挂回。每个材质名共享一份实例。
+    static Material HaraMat(string matName)
+    {
+        Material cached;
+        if (HaraCache.TryGetValue(matName, out cached) && cached != null) return cached;
+
+        Shader sh = Shader.Find("Universal Render Pipeline/Lit");
+        if (sh == null) sh = Shader.Find("Standard");
+        Material m = new Material(sh);
+        m.name = "NbSkin_" + matName;
+
+        Texture2D tex = Resources.Load<Texture2D>("BuildingTex/" + matName + "_diffuse");
+        if (tex != null && m.HasProperty("_BaseMap")) m.SetTexture("_BaseMap", tex);
+        else Debug.LogWarning("[Nb] 仓库贴图没加载到：" + matName);
+
+        // 扫描贴图本身偏暗：乘色只压到 0.72，细节靠 NbLamps 的仓库泛光去读；
+        // 压太狠（0.55 试过）砖缝和锈迹在夜里会整片糊掉。表面哑光。
+        if (m.HasProperty("_BaseColor")) m.SetColor("_BaseColor", new Color(0.72f, 0.72f, 0.75f));
+        if (m.HasProperty("_Smoothness")) m.SetFloat("_Smoothness", 0.15f);
+
+        HaraCache[matName] = m;
+        return m;
+    }
+
+    static Material _abandonedFront;
+
+    /// 废弃楼主墙面材质：照片贴图 × 夜间底色。所有 abandoned_ 实例共享一份。
+    static Material AbandonedFront()
+    {
+        if (_abandonedFront != null) return _abandonedFront;
+
+        Shader sh = Shader.Find("Universal Render Pipeline/Lit");
+        if (sh == null) sh = Shader.Find("Standard");
+        Material m = new Material(sh);
+        m.name = "NbSkin_AbandonedFront";
+
+        Texture2D tex = Resources.Load<Texture2D>("BuildingTex/AbandonedFront");
+        if (tex != null && m.HasProperty("_BaseMap")) m.SetTexture("_BaseMap", tex);
+        else Debug.LogWarning("[Nb] Resources/BuildingTex/AbandonedFront 没加载到，废弃楼主墙保持纯色。");
+
+        // 贴图是白天照片：乘一层冷灰让它落进夜里。0.55 是起点，按渲染效果调。
+        if (m.HasProperty("_BaseColor")) m.SetColor("_BaseColor", new Color(0.55f, 0.55f, 0.58f));
+        if (m.HasProperty("_Smoothness")) m.SetFloat("_Smoothness", 0.15f);   // 风化墙面是哑光的
+
+        _abandonedFront = m;
+        return m;
+    }
+
+    static readonly Dictionary<Material, Material> NightCache = new Dictionary<Material, Material>();
+
+    /// 共享资产材质不能直接改（会连累别的楼），复制一份实例并把乘色压暗。
+    static Material NightClone(Material src, float k)
+    {
+        Material cached;
+        if (NightCache.TryGetValue(src, out cached) && cached != null) return cached;
+
+        Material m = new Material(src);
+        m.name = src.name + " (night)";
+        if (m.HasProperty("_BaseColor"))
+        {
+            Color c = m.GetColor("_BaseColor");
+            m.SetColor("_BaseColor", new Color(c.r * k, c.g * k, c.b * k * 1.04f, c.a));
+        }
+        if (m.HasProperty("_Smoothness")) m.SetFloat("_Smoothness", Mathf.Min(m.GetFloat("_Smoothness"), 0.20f));
+
+        NightCache[src] = m;
+        return m;
     }
 
     /// 名字 → 表面。**按场景分表**：三个场景的命名是各自一套，

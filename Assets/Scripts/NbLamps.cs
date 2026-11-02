@@ -56,6 +56,19 @@ internal static class NbLamps
             l.renderMode = LightRenderMode.ForcePixel;
             n++;
         }
+
+        // 工业仓库（industrial_08，扫描模型 + 照片贴图）北面正对主光的背风面：
+        // 不补光的话贴图在夜里是一片纯黑，等于白挂。在北面外 6~8 m 放两盏
+        // 低强度冷色泛光，模拟远处路灯/月光的余量 —— 墙面纹理能读出来，
+        // 又不至于亮成白天。找不到这栋楼（比如回滚到白盒）就跳过。
+        GameObject wh = GameObject.Find("industrial_08");
+        if (wh != null)
+        {
+            n += Bulb(wh.transform, "Warehouse Fill W", new Vector3(102.0f, 5.5f, -56.0f),
+                new Color(0.62f, 0.70f, 0.88f), 10f, 20f);
+            n += Bulb(wh.transform, "Warehouse Fill E", new Vector3(112.5f, 5.0f, -58.0f),
+                new Color(0.62f, 0.70f, 0.88f), 8f, 18f);
+        }
         return n;
     }
 
