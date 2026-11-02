@@ -1,5 +1,5 @@
 // @role Neighbourhood game manager: builds the scene, runs the 10-level loop, spawns cheese/cats/guards, resolves win/loss.
-// @calls NbScene NbLevels NbBuilder NbPlayer NbGuard NbCat NbCheese NbHud NbMap NbLighting NbFridge NbFood NbFoodArt NbColliders NbBriefing NbSceneSelect AudioManager
+// @calls NbScene NbLevels NbBuilder NbPlayer NbGuard NbCat NbCheese NbHud NbMap NbLighting NbFridge NbFood NbFoodArt NbColliders NbBriefing NbSceneSelect NbColdMist AudioManager
 // @tune DoorWarnTime:float:1-6:fridge door-open warning seconds
 // @tune CatHeight:float:0.5-3:cat height m (feeds cat body probe scale)
 
@@ -184,6 +184,10 @@ internal class NbGame : MonoBehaviour
 
         // 近景细节：草簇 / 墙根杂草 / 水洼 / 霜。纯装饰、无碰撞、Ignore Raycast 层。
         NbDetail.Build(Root, NbScene.Kind);
+
+        // 冰箱冷气：每层搁板前沿下沉的冷雾 + 地面薄雾 + 门缝渗雾（开门时涌出来）。
+        // 非冰箱场景内部直接 return。粒子全运行时生成，贴图也不落盘（见 NbColdMist）。
+        NbColdMist.Build(Root, NbScene.Kind);
 
         // 造玩家。这一句之后：场景里那个 FirstPersonController 被整个关掉，
         // 场上只剩一台相机 —— 就是玩家的眼睛。身体和相机都是新造的，不复用场景里的任何东西。
@@ -1043,6 +1047,7 @@ internal class NbGame : MonoBehaviour
                      : 0f;
         _doorVisual = Mathf.MoveTowards(_doorVisual, target, dt * (target > 0.5f ? 9f : 3.2f));
         NbFridge.SetDoor(_doorVisual);
+        NbColdMist.SetDoor(_doorVisual);   // 门缝冷气的发射率跟着门开度走（非冰箱场景是 no-op）
     }
 
     /// 门开着时，玩家是不是被东西挡住了。
