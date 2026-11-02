@@ -158,7 +158,32 @@ internal class NbGame : MonoBehaviour
 
         // 12 栋楼是编辑器脚本换的模型，碰撞体在那个脚本里算错过一次（转置），
         // 这里按网格本地包围盒重算一遍。后院/厨房没有这 12 栋楼，跑它只会白扫一遍场景。
-        if (NbScene.Kind == NbSceneKind.Street) NbColliders.Normalize();
+        if (NbScene.Kind == NbSceneKind.Street)
+        {
+            NbColliders.Normalize();
+
+            // 12 堆「RubbishBox」原本是 16 个随机旋转的灰方块，读不出"这是垃圾"。
+            // 这一步把它们的渲染关掉、原地按同一副包络重新长出一堆垃圾；
+            // **碰撞体一个都不动**，所以掩体与猫的视线判定和改动之前完全一致（见 NbRubbish 文件头）。
+            NbRubbish.DressAll();
+        }
+
+        // 材质换皮：三个场景的几何都是 Nb.Box 拼的纯色方块，路面/围墙/搁板全是一整片颜色。
+        // 这里按名字把它们换成带贴图与法线的材质（贴图运行时生成，不落盘，见 NbSkin）。
+        // 必须在 Build 之后：baked 街区那套是场景里已有的物体，得单独扫一遍。
+        NbSkin.Apply(Root, NbScene.Kind);
+        if (NbScene.Kind == NbSceneKind.Street)
+        {
+            Transform baked = NbBuilder.FindExisting();
+            if (baked != null && baked != Root) NbSkin.Apply(baked, NbScene.Kind);
+        }
+
+        // 灯罩只是一块自发光材质，它自己不照亮任何东西 —— 这里在灯位补一盏实光源，
+        // 地面才有"灯下的光池"，玩家也才看得出自己站在灯下还是灯之间（见 NbLamps）。
+        NbLamps.Add(Root, NbScene.Kind);
+
+        // 近景细节：草簇 / 墙根杂草 / 水洼 / 霜。纯装饰、无碰撞、Ignore Raycast 层。
+        NbDetail.Build(Root, NbScene.Kind);
 
         // 造玩家。这一句之后：场景里那个 FirstPersonController 被整个关掉，
         // 场上只剩一台相机 —— 就是玩家的眼睛。身体和相机都是新造的，不复用场景里的任何东西。

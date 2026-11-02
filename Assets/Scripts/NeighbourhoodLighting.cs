@@ -66,13 +66,15 @@ public static class NbLighting
         switch (kind)
         {
             case NbSceneKind.Yard:
-                keyPower = 0.34f;
-                fogDensity = 0.020f;
+                // 0.34 时后院几乎全黑（实测整帧平均亮度 6），地面看不出是草地。
+                // 抬到 0.44：仍然比街区暗一档（手电才是主角），但轮廓与草地纹理能读出来。
+                keyPower = 0.80f;
+                fogDensity = 0.011f;
                 sunPitch = 42f;
                 keyColor = new Color(0.66f, 0.76f, 1.00f);
                 skyColor = new Color(0.014f, 0.020f, 0.038f);
                 fogCol = new Color(0.035f, 0.048f, 0.075f);
-                ambCol = new Color(0.050f, 0.060f, 0.095f);
+                ambCol = new Color(0.085f, 0.098f, 0.135f);
                 break;
 
             case NbSceneKind.Kitchen:
@@ -94,15 +96,15 @@ public static class NbLighting
                 // 环境光和 NbFridge.SetDoor 里的 AmbClosed **必须一样**：
                 // 两处都写这个数，是因为 SetDoor(0) 在 LoadLevel 里会把 Apply 的结果覆盖掉，
                 // 改一处不改另一处，会看到"进关闪一下才变暗"。
-                keyPower = 0.28f;
-                fillPower = 0.05f;
-                fogDensity = 0.032f;
+                keyPower = 0.40f;
+                fillPower = 0.07f;
+                fogDensity = 0.020f;
                 sunPitch = 74f;
                 keyColor = new Color(0.80f, 0.88f, 1.00f);
                 fillColor = new Color(0.52f, 0.58f, 0.68f);
                 skyColor = new Color(0.008f, 0.010f, 0.014f);
                 fogCol = new Color(0.058f, 0.068f, 0.085f);
-                ambCol = new Color(0.052f, 0.058f, 0.072f);
+                ambCol = new Color(0.092f, 0.100f, 0.118f);
                 break;
         }
 

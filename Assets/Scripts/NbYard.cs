@@ -47,8 +47,8 @@ internal static class NbYard
     static readonly Color WallCap = new Color(0.31f, 0.27f, 0.23f);
     static readonly Color HouseCol = new Color(0.20f, 0.19f, 0.19f);
     static readonly Color Door    = new Color(0.09f, 0.07f, 0.06f);
-    static readonly Color BushA   = new Color(0.09f, 0.17f, 0.10f);
-    static readonly Color BushB   = new Color(0.12f, 0.22f, 0.12f);
+    static readonly Color BushA   = new Color(0.13f, 0.22f, 0.13f);
+    static readonly Color BushB   = new Color(0.17f, 0.28f, 0.16f);
     static readonly Color BinA    = new Color(0.14f, 0.16f, 0.15f);
     static readonly Color BinB    = new Color(0.11f, 0.13f, 0.12f);
     static readonly Color Wood    = new Color(0.20f, 0.15f, 0.10f);
@@ -251,11 +251,32 @@ internal static class NbYard
 
     static void Bush(Transform p, string n, float x, float z, float d)
     {
-        // 主球是实体的：它既是视觉主体，也是保安视线的遮挡物。
+        // 主球是视觉主体（也是保安视线的遮挡物）。
         Nb.Ball(p, n, new Vector3(x, d * 0.30f, z), d, BushA, false);
         // 两个小一点的副球不挡人，只是把轮廓打碎，别让灌木看起来像一个台球。
         Nb.Ball(p, n + " b", new Vector3(x + d * 0.26f, d * 0.20f, z + d * 0.18f), d * 0.66f, BushB, false);
         Nb.Ball(p, n + " c", new Vector3(x - d * 0.22f, d * 0.16f, z - d * 0.20f), d * 0.58f, BushB, false);
+
+        // 再撒 5 个鼓包。只有两三个球的时候，灌木的轮廓是一段完美的圆弧 ——
+        // 夜里侧光一打，那条高光弧线立刻暴露"这是 Sphere"。
+        // 鼓包按黄金角铺开，大小/高度各不相同，轮廓就变成了不规则的团。
+        for (int i = 0; i < 7; i++)
+        {
+            float a = (i * 137.5f + Hash01(x, z) * 90f) * Mathf.Deg2Rad;
+            float rr = d * (0.34f + 0.22f * Hash01(x + i * 3.1f, z - i * 1.7f));
+            float s = d * (0.34f + 0.16f * Hash01(x - i * 2.3f, z + i * 4.1f));
+            float yy = d * (0.12f + 0.30f * Hash01(x + i, z + i));
+            Nb.Ball(p, n + " lobe " + i,
+                new Vector3(x + Mathf.Cos(a) * rr, yy, z + Mathf.Sin(a) * rr),
+                s, (i % 2 == 0) ? BushA : BushB, false);
+        }
+    }
+
+    /// 固定种子的 0..1（同一个坐标每次一样，场景不会每次进都不一样）
+    static float Hash01(float a, float b)
+    {
+        float v = Mathf.Sin(a * 12.9898f + b * 78.233f) * 43758.5453f;
+        return v - Mathf.Floor(v);
     }
 
     static void Bins(Transform p, string n, float x, float z)
