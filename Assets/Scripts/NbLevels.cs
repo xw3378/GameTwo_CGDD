@@ -1,10 +1,10 @@
-// @role Difficulty tables: 10 levels per scene (cheese/cats/speed/sight/guards/exposure/rot/door).
+// @role Difficulty tables: 3 levels per playable scene (cheese/cats/speed/sight/guards/exposure/rot/door).
 // @calls NbScene
 // @tune BiteDamage:int:1-50:health lost per catch
 // @tune StartHp:int:10-500:starting health
 // @tune Count:int:1-20:levels per scene
 
-// NbLevels.cs — 三个场景 × 10 关的难度表
+// NbLevels.cs — 可玩场景 × 3 关的难度表
 //
 // 一关 = 一组数字，没有别的。骨架四个字段三个场景共用：
 //   ① 场上有几个目标（= 必须带回几个）
@@ -19,7 +19,7 @@
 //   玩家走着 2.30 m/s、跑着 3.91 m/s（见 NbPlayer.WalkSpeed / RunMul）。
 //   · 巡逻速度 **始终低于走路速度** ⇒ 正常走就能拉开，猫不是"贴着你转的电锯"；
 //   · 追击速度 **高于走路、始终低于跑步** ⇒ 被抓过一次之后必须按 Shift 才甩得掉。
-//   第 10 关 3.25 仍低于 3.91，所以"跑一定能脱身"这条底线在最后一关也成立 ——
+//   第 3 关 2.40 仍低于 3.91，所以"跑一定能脱身"这条底线在最后一关也成立 ——
 //   难度来自"你跑不了那么久、跑的方向又是错的"，而不是"这游戏跑不过猫"。
 //
 // 后院的速度比街区**低一档**：那里真正的威胁是手电，不是爪子。
@@ -29,7 +29,7 @@ using UnityEngine;
 
 internal struct NbLevelCfg
 {
-    internal int No;          // 关卡号 1…10
+    internal int No;          // 关卡号 1…3
     internal int Cheese;      // 目标数 = 需要带回的数量
     internal int Cats;        // 猫的数量
     internal float Patrol;    // 巡逻速度 m/s
@@ -48,7 +48,7 @@ internal struct NbLevelCfg
 
 internal static class NbLevels
 {
-    internal const int Count = 10;
+    internal const int Count = 3;
 
     /// 每被抓一次扣多少血。100 血 ⇒ 一关之内最多被咬 10 口。
     internal const int BiteDamage = 10;
@@ -56,8 +56,7 @@ internal static class NbLevels
     internal const int StartHp = 50;
 
     // ───────────────────────── 01 居民街区 ─────────────────────────
-    // 两条曲线分开走：奶酪 = 关卡数 + 1（封顶 10），猫 = 关卡数（封顶 10）。
-    // 两者相乘 ⇒ 第 10 关不是"第 1 关多几只猫"，而是"路更长 + 可躲的道更少"。
+    // 两条曲线分开走：奶酪 = 关卡数 + 1，猫 = 关卡数。只留 3 关。
 
     static readonly NbLevelCfg[] Street =
     {
@@ -65,13 +64,6 @@ internal static class NbLevels
         Lv( 1,    2,     1,   1.10f,  2.20f, 10f),
         Lv( 2,    3,     2,   1.10f,  2.30f, 11f),
         Lv( 3,    4,     3,   1.15f,  2.40f, 11f),
-        Lv( 4,    5,     4,   1.20f,  2.50f, 12f),
-        Lv( 5,    6,     5,   1.25f,  2.60f, 12f),
-        Lv( 6,    7,     6,   1.30f,  2.75f, 13f),
-        Lv( 7,    8,     7,   1.35f,  2.90f, 14f),
-        Lv( 8,    9,     8,   1.40f,  3.00f, 14f),
-        Lv( 9,   10,     9,   1.45f,  3.10f, 15f),
-        Lv(10,   10,    10,   1.55f,  3.25f, 16f),
     };
 
     // ───────────────────────── 02 夜巡后院 ─────────────────────────
@@ -123,12 +115,11 @@ internal static class NbLevels
         LvK(10,   10,     4,   1.40f,  3.25f, 14f,    26f,   8),
     };
 
-    // ───────────────────────── 03 冰箱（当前第三格） ─────────────────────────
+    // ───────────────────────── 冰箱 ─────────────────────────
     // 这一关**没有猫**（Cats 恒为 0），唯一的威胁是门：
-    //   DoorGap  两次开门之间隔多久 —— 15 → 8 秒。这不是"喘息时间"，而是
-    //            "你能连续跑几趟"：跑完一趟（爬一层、捡两件、躲一次）大约 12 秒，
-    //            所以第 8 关之后，一次开门会把你正在做的事劈成两半。
-    //   DoorOpen 门开多久 —— 1.4 → 2.5 秒。这段时间里**只在开门那一刻判定一次**，
+    //   DoorGap  两次开门之间隔多久 —— 15 → 13 秒。这不是"喘息时间"，而是
+    //            "你能连续跑几趟"：跑完一趟（爬一层、捡两件、躲一次）大约 12 秒。
+    //   DoorOpen 门开多久 —— 1.4 → 1.6 秒。这段时间里**只在开门那一刻判定一次**，
     //            不是持续照射：玩家要么已经躲好了，要么没有，中间再冲过去不算数。
     //            所以这一列实际控制的是"你有多久不敢动"，越长越像被钉在原地。
     //
@@ -141,13 +132,6 @@ internal static class NbLevels
         LvF( 1,   2,    0,  15.0f, 1.4f),
         LvF( 2,   3,    0,  14.0f, 1.5f),
         LvF( 3,   4,    0,  13.0f, 1.6f),
-        LvF( 4,   5,    0,  12.5f, 1.7f),
-        LvF( 5,   6,    0,  12.0f, 1.8f),
-        LvF( 6,   7,    0,  11.0f, 1.9f),
-        LvF( 7,   8,    0,  10.5f, 2.0f),
-        LvF( 8,   9,    0,  10.0f, 2.2f),
-        LvF( 9,  10,    0,   9.0f, 2.3f),
-        LvF(10,  12,    0,   8.0f, 2.5f),
     };
 
     // ───────────────────────── 工厂 ─────────────────────────
@@ -191,7 +175,7 @@ internal static class NbLevels
 
     // ───────────────────────── 取表 ─────────────────────────
 
-    /// 按当前场景取第 level 关。越界夹回 1…10，绝不返回空 ——
+    /// 按当前场景取第 level 关。越界夹回 1…Count，绝不返回空 ——
     /// 这一关的所有数值都从这里出，返回空会让"猫不生成 / 目标数为 0"变成静默的空白关卡。
     internal static NbLevelCfg Get(int level)
     {

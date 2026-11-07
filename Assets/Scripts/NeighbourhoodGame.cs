@@ -1,16 +1,19 @@
-// @role Neighbourhood game manager: builds the scene, runs the 10-level loop, spawns cheese/cats/guards, resolves win/loss.
-// @calls NbScene NbLevels NbBuilder NbPlayer NbGuard NbCat NbCheese NbHud NbMap NbLighting NbFridge NbFood NbFoodArt NbColliders NbBriefing NbSceneSelect NbColdMist AudioManager
+// @role Neighbourhood game manager: builds the scene, runs the level loop, spawns cheese/cats/guards, resolves win/loss.
+// @calls NbScene NbLevels NbBuilder NbPlayer NbGuard NbCat NbCheese NbHud NbLighting NbFridge NbFood NbFoodArt NbColliders NbBriefing NbSceneSelect NbColdMist NbSmell AudioManager
 // @tune DoorWarnTime:float:1-6:fridge door-open warning seconds
 // @tune CatHeight:float:0.5-3:cat height m (feeds cat body probe scale)
+// @tune ThreatNear:float:1-10:distance m where danger screen edges first appear
+// @tune ThreatFull:float:0.5-4:distance m where danger screen edges are fully bright
+// @tune SmellCooldown:float:1-15:mouse smell ability cooldown seconds
 
-// NeighbourhoodGame.cs — 居民区关卡：10 关，猫和奶酪一起变多，被抓一次 -10 血
+// NeighbourhoodGame.cs — 居民区关卡：3 关，猫和奶酪一起变多，被抓一次 -10 血
 //
 // 装配方式沿用本工程的老规矩：运行时自己 new 出所有物体，场景文件一行不改。
 //   ① 读你在场景里摆好的出生点（旧 FirstPersonController 的位置，只要在围墙以内）
 //   ② 搭环境（NbBuilder）
 //   ③ NbPlayer.Spawn 造一个**全新的**玩家（自带身体和相机；旧的那个整个关掉）
 //   ④ 按 NbLevels 的表装载第 1 关：摆 N 块奶酪、放 M 只猫
-//   ⑤ 建 HUD（含生命条）与方形小地图
+//   ⑤ 建 HUD（含生命条）
 //
 // 关卡之间的差别只有四个数（奶酪数 / 猫数 / 猫速 / 视野），全部在 NbLevels.cs 里；
 // 这里负责的是**换关**：清掉上一关的物体、按新数字重摆一遍、血补满、人回出生点。
@@ -78,6 +81,18 @@ internal class NbGame : MonoBehaviour
 
     /// 现在有没有保安在追你。HUD 拿它决定要不要亮那行 "SPOTTED / SHIFT TO RUN"。
     internal bool Chased;
+
+    /// 最近的敌人（猫或保安）离你多远 → 折成 0…1 的「危险度」，HUD 用它点亮屏幕边缘。
+    /// 0 = 没有敌人在 ThreatNear 以内；1 = 已经贴到 ThreatFull 以内（快被抓）。
+    /// 场景里只有一种敌人：街区/厨房是猫，后院是保安，冰箱两者都没有 ⇒ 冰箱里永远 0。
+    internal float Threat;
+    internal float ThreatNear = 5f;     // 敌人进到这么近，屏幕边缘开始发光
+    internal float ThreatFull = 1.6f;   // 敌人贴到这么近，边缘发光到最亮
+
+    // ── 嗅觉 ──
+    // 按 R 闻一下奶酪：喷一股朝最近奶酪飘的黄色粒子，5 秒后才能再用。
+    internal float SmellCooldown = 5f;
+    float _smellReadyAt;
 
     /// 这个时间点之前不要弹追击/脱身的提示（刚被撞的那两秒）。
     float _quietUntil;
@@ -213,10 +228,9 @@ internal class NbGame : MonoBehaviour
         // 之后怎么抬强度都不亮。道理写在 NbFridge.CreateDoorLight 的注释里。
         if (NbScene.UsesDoor) NbFridge.CreateDoorLight(Root);
 
-        // HUD / 小地图先建好，再装载第 1 关 —— 反过来的话，装载时那些 "HideEnd" 之类的刷新
+        // HUD 先建好，再装载第 1 关 —— 反过来的话，装载时那些 "HideEnd" 之类的刷新
         // 会静默打空（NbHud.I 还是 null），失败/过关面板的初始状态就没人负责了。
         if (NbHud.I == null) NbHud.Create();
-        if (NbMap.I == null) NbMap.Create();
 
         LoadLevel(NbProgress.Best(NbScene.Kind));
 
@@ -772,16 +786,84 @@ internal class NbGame : MonoBehaviour
         CollectCheck();
         ThreatUpdate();
         MoveWatchdog(kb);
+        SmellUpdate(kb);
     }
 
     // ───────────────────────── 场景专属威胁 ─────────────────────────
 
     void ThreatUpdate()
     {
+        ThreatProbe();
         if (NbScene.UsesGuards) GuardUpdate();
         if (NbScene.UsesRot)    RotUpdate();
         if (NbScene.UsesDoor)   DoorUpdate();
         MeterUpdate();
+    }
+
+    /// 每帧量一次「最近的敌人有多近」。猫和保安共用同一份危险度 ——
+    /// 街区/厨房里 Cats 有东西、Guards 是空的；后院反过来；冰箱两个都空，Threat 恒 0。
+    void ThreatProbe()
+    {
+        float best = float.MaxValue;
+        for (int i = 0; i < Cats.Count; i++)
+        {
+            if (Cats[i] == null) continue;
+            float d = Nb.FlatDist(Cats[i].transform.position, Player.position);
+            if (d < best) best = d;
+        }
+        for (int i = 0; i < Guards.Count; i++)
+        {
+            if (Guards[i] == null) continue;
+            float d = Nb.FlatDist(Guards[i].transform.position, Player.position);
+            if (d < best) best = d;
+        }
+
+        if (best >= ThreatNear) { Threat = 0f; return; }
+        float span = Mathf.Max(0.1f, ThreatNear - ThreatFull);
+        Threat = Mathf.Clamp01((ThreatNear - best) / span);
+    }
+
+    // ───────────────────────── 嗅觉 ─────────────────────────
+
+    /// 按 R：闻一下，喷一股朝最近奶酪飘的黄色粒子。5 秒冷却。
+    void SmellUpdate(Keyboard kb)
+    {
+        if (kb == null || !kb.rKey.wasPressedThisFrame) return;
+        if (Rig == null || !Rig.AcceptInput) return;   // 标题页/教学/结算期间不响应
+        if (Time.time < _smellReadyAt) return;          // 冷却中：按了也没反应
+
+        _smellReadyAt = Time.time + SmellCooldown;
+
+        // 找最近那块还没捡、也没烂掉的奶酪（冰箱里会带上下方向，街上基本是平的）。
+        Transform target = null;
+        float bestSq = float.MaxValue;
+        for (int i = 0; i < Cheeses.Count; i++)
+        {
+            NbCheese c = Cheeses[i];
+            if (c == null || c.Taken || c.Rotted) continue;
+            float sq = (c.transform.position - Player.position).sqrMagnitude;
+            if (sq < bestSq) { bestSq = sq; target = c.transform; }
+        }
+
+        Vector3 dir;
+        if (target != null)
+        {
+            Vector3 d = target.position - Player.position;
+            dir = d.sqrMagnitude > 1e-4f ? d.normalized : Rig.Facing;
+        }
+        else
+        {
+            dir = Rig.Facing;   // 没奶酪可闻：就朝面前喷一小股，告诉玩家"这招用了"
+        }
+
+        // 云总是先在视线前方生成（约 1.2 m 前），再朝奶酪方向慢慢漂。
+        Camera cam = Rig.Cam;
+        Vector3 spawn = cam != null
+            ? cam.transform.position + cam.transform.forward * 1.2f
+            : Player.position + Vector3.up * NbPlayer.EyeHeight + Rig.Facing * 1.2f;
+        NbSmell.Sniff(spawn, dir);
+        Debug.LogFormat("[Nb] 闻了一下：在视线前方喷出气味云，朝 ({0:F2},{1:F2},{2:F2}) 漂{3}。",
+            dir.x, dir.y, dir.z, target != null ? "（最近奶酪）" : "（附近没奶酪）");
     }
 
     /// 底部那根条每帧刷一次。颜色本身就是读数：
@@ -1457,11 +1539,10 @@ internal class NbGame : MonoBehaviour
         Rig = null;
         Player = null;
 
-        // HUD / 小地图是独立根物体、不在 Root 下面，得单独拆。
+        // HUD 是独立根物体、不在 Root 下面，得单独拆。
         // Kill 之后必须等一帧：Destroy 是延迟到帧末的，这一帧旧 Canvas 还在，
         // 紧接着 Create 会让两套 HUD 短暂叠在一起（数值不同，看起来像画面重影）。
         if (NbHud.I != null) Nb.Kill(NbHud.I.gameObject);
-        if (NbMap.I != null) Nb.Kill(NbMap.I.gameObject);
         yield return null;
 
         NbScene.Kind = k;

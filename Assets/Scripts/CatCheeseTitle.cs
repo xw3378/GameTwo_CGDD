@@ -45,8 +45,8 @@ internal class CatCheeseTitle : MonoBehaviour
     // 文案里只出现字母 / 数字 / 空格 / 句号逗号斜杠 —— 这套字体（Kindly Crunch）没有完整 ASCII，
     // 破折号、波浪号、中点之类的装饰符号会渲染成空白且不报错。
     const string Blurb =
-        "Three places, ten levels each.  A residential block, a backyard patrol, a kitchen at night.\n" +
-        "Carry the food home before the cats or the torch finds you.  A bite costs 10 health.\n" +
+        "Two places, three levels each.  A residential block and a fridge at night.\n" +
+        "Carry the food home before the cats or the light finds you.  A bite costs 10 health.\n" +
         "Pick your district after you press start.  Nothing is locked.";
     const string Creators = "by Maile & Xinyuan";
     const string ButtonLabel = "START GAME";

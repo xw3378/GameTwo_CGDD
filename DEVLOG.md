@@ -78,3 +78,67 @@ Add `## Stage Reflection NNN — title` only when you ask for one: Keep / Change
 - Request: Recolor the woodpile and doghouse colorful/dark, and make the walls a deep turquoise.
 - What changed: In `NbYard`, set the woodpile to dark orange with a dark yellow cap, the doghouse to dark green with a dark purple roof, and the brick walls to deep turquoise. Left wall caps/steps unchanged.
 - Result: The player's verb did not change. Win and loss did not change. The yard's color layout changed, but the rules are unchanged.
+
+## Interaction 007 — danger glow at the screen edges
+
+- Date: 2026-11-07
+- Who asked: student
+- Request: Add a visual indicator when an enemy (cat, or the patrol guards) gets too close, e.g. the edges of the screen get brighter.
+- What changed: Added a full-screen vignette to the HUD whose edges brighten as the nearest cat or guard approaches. `NbGame` now folds the distance to the nearest enemy into a 0…1 `Threat` (via `ThreatNear`/`ThreatFull`), and `NbHud` drives the edge glow from it: a warm glow that turns red as the enemy gets very close. Cats and guards share the same signal; the fridge scene has neither so it stays off.
+- Result: The player's verb did not change. Win and loss did not change. Only the readability of danger changed, not the skeleton.
+
+## Interaction 008 — softer danger glow
+
+- Date: 2026-11-07
+- Who asked: student
+- Request: The edge vignette is too harsh; make it less obvious and more transparent.
+- What changed: Lowered the danger glow's peak alpha (0.55 → 0.22) and pulled the gradient's start radius further out (0.52 → 0.62) so the bright band hugs the screen edges instead of creeping toward the center.
+- Result: The player's verb did not change. Win and loss did not change. Only the intensity of the warning readout changed, not the skeleton.
+
+## Interaction 009 — white-to-red danger glow
+
+- Date: 2026-11-07
+- Who asked: student
+- Request: Change the far-distance glow color from warm/yellow to white, so it reads white → red instead of warm → red.
+- What changed: Replaced the `ThreatWarm` color with a pure white `ThreatFar` in `NbHud`; the edge glow now lerps white at distance to red up close.
+- Result: The player's verb did not change. Win and loss did not change. Only the color of the warning readout changed, not the skeleton.
+
+## Interaction 010 — smell mechanic + tighter vignette
+
+- Date: 2026-11-07
+- Who asked: student
+- Request: Halve the vignette detection distance; rework the smell cloud to be a foggy, denser, lighter-yellow cloud that spawns in front of the viewer, waits 0.75 s, then slowly floats toward the cheese.
+- What changed: Lowered `ThreatNear` (10 → 5 m) so the edge glow only appears when an enemy is much closer. Added `NbSmell` and an R-key smell power (`SmellCooldown` 5 s) that emits a dense, soft yellow cloud in front of the camera; the cloud holds ~0.75 s then drifts slowly toward the nearest uncollected cheese. Added the `R - SMELL` hint to the HUD.
+- Result: The player's verb did not change. Win and loss did not change. A new optional "find the cheese" affordance was added, but the rules are unchanged.
+
+## Interaction 011 — smaller, fainter smell particles
+
+- Date: 2026-11-07
+- Who asked: student
+- Request: Make the smell particles smaller and slightly more transparent.
+- What changed: In `NbSmell`, reduced particle size (0.30 → 0.20 m) and lowered the color-over-lifetime alpha (peak 0.42 → 0.30, plateau 0.32 → 0.22).
+- Result: The player's verb did not change. Win and loss did not change. Only the look of the smell cloud changed, not the skeleton.
+
+## Interaction 012 — remove minimap and backyard, trim to 3 levels
+
+- Date: 2026-11-07
+- Who asked: student
+- Request: Remove the in-level minimap, remove the backyard district, and reduce the level count to 3 for both the residential block and the fridge.
+- What changed: Stopped creating the minimap (`NbMap.Create` removed from `NbGame.Boot`, plus its scene-switch teardown). Removed the backyard from the scene-select page (`NbSceneSelect` now shows Street + Fridge, two cards). Set `NbLevels.Count` to 3 and trimmed the `Street` and `Fridge` tables to three levels each. Updated the title-screen and select-page copy accordingly.
+- Result: The player's verb did not change. Win and loss did not change. Content and navigation changed (no minimap, two districts, three levels each), but the rules are unchanged.
+
+## Interaction 013 — capsule-shaped smell cloud
+
+- Date: 2026-11-07
+- Who asked: student
+- Request: Condense the smell particles so they are not a wall of particles at spawn; make a denser horizontal capsule pointing toward the cheese.
+- What changed: In `NbSmell`, added a Box emission shape (0.35 × 0.18 × 1.6 m) whose long axis is rotated to the cheese's horizontal direction each sniff, so the cloud spawns as a flat, elongated capsule pointing at the cheese instead of a scattered blob.
+- Result: The player's verb did not change. Win and loss did not change. Only the shape of the smell cloud changed, not the skeleton.
+
+## Interaction 014 — teardrop smell trail
+
+- Date: 2026-11-07
+- Who asked: student
+- Request: Change the smell spawn to a horizontal 3D teardrop, fat end toward the player, denser near the player and sparse toward the cheese, with the particles near the player staying static and most streaming toward the cheese.
+- What changed: Reworked `NbSmell` to emit each particle via `EmitParams` with a teardrop-sampled position (circular cross-section tapering to a point) and a per-particle velocity: near-player particles stay put, the rest stream toward the cheese. Removed the box shape and the pause-then-drift velocity curve.
+- Result: The player's verb did not change. Win and loss did not change. Only the shape and motion of the smell cloud changed, not the skeleton.

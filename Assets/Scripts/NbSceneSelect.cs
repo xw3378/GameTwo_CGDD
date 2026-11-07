@@ -1,4 +1,4 @@
-// @role Scene-select page after the title: pick Street/Yard/Fridge, each with its own best-level progress.
+// @role Scene-select page after the title: pick Street/Fridge, each with its own best-level progress.
 // @calls NbGame NbScene NbProgress NbUi
 
 // NbSceneSelect.cs — 标题页之后的场景选择页
@@ -11,7 +11,7 @@
 // 交互沿用标题页那套：RectTransformUtility 手动判定 + Mouse.current，不依赖 EventSystem。
 //   鼠标悬停变亮、点击进入；键盘 1 / 2 / 3 也能选（测试时比找鼠标快得多）。
 //
-// 三个场景**自由选择**：没有解锁条件，各自记自己的最高关卡（NbProgress）。
+// 两个场景**自由选择**：没有解锁条件，各自记自己的最高关卡（NbProgress）。
 // 这一条是用户明确选的 —— 换成顺序解锁的话，每次验收新场景都得先打 10 关。
 
 using System.Collections;
@@ -27,29 +27,26 @@ internal class NbSceneSelect : MonoBehaviour
 
     static readonly NbSceneKind[] Order =
     {
-        NbSceneKind.Street, NbSceneKind.Yard, NbSceneKind.Fridge,
+        NbSceneKind.Street, NbSceneKind.Fridge,
     };
 
-    // 每个场景一个主色。**不是装饰**：三张卡片的颜色会一路延续到那一关的 HUD 提示色上，
+    // 每个场景一个主色。**不是装饰**：每张卡片的颜色会一路延续到那一关的 HUD 提示色上，
     // 玩家选完之后就知道"我在蓝的那一关里"，不用再看标题。
     static readonly Color[] Accent =
     {
         new Color(1.00f, 0.76f, 0.32f),   // 街区：路灯的暖黄
-        new Color(0.46f, 0.68f, 1.00f),   // 后院：月光与手电的冷蓝
         new Color(0.62f, 0.84f, 1.00f),   // 冰箱：冷藏灯的白
     };
 
     static readonly string[] Title =
     {
         "RESIDENTIAL\nBLOCK",
-        "BACKYARD\nPATROL",
         "THE\nFRIDGE",
     };
 
     static readonly string[] Sub =
     {
         "Twelve houses.  Five alleys.\nA cat on every corner.",
-        "One open lawn.\nNowhere to hide in the middle.",
         "Six shelves.  One door.\nNowhere to stand in the light.",
     };
 
@@ -57,9 +54,9 @@ internal class NbSceneSelect : MonoBehaviour
     static readonly Color DimCol   = new Color(1f, 1f, 1f, 0.55f);
     static readonly Color TextCol  = new Color(1f, 0.97f, 0.91f, 1f);
 
-    readonly RectTransform[] _cards = new RectTransform[3];
-    readonly Image[] _cardBg = new Image[3];
-    readonly TextMeshProUGUI[] _cardHint = new TextMeshProUGUI[3];
+    readonly RectTransform[] _cards = new RectTransform[2];
+    readonly Image[] _cardBg = new Image[2];
+    readonly TextMeshProUGUI[] _cardHint = new TextMeshProUGUI[2];
 
     CanvasGroup _group;
     int _hover = -1;
@@ -125,24 +122,24 @@ internal class NbSceneSelect : MonoBehaviour
         Center(head.rectTransform, new Vector2(0f, 330f), new Vector2(1200f, 60f));
 
         TextMeshProUGUI note = NbUi.Text("Note", c,
-            "Three places, ten levels each.  Pick any one.  They all start at level 1.",
+            "Two places, three levels each.  Pick one.  Both start at level 1.",
             20f, DimCol, TextAlignmentOptions.Center);
         Center(note.rectTransform, new Vector2(0f, 278f), new Vector2(1400f, 34f));
 
-        for (int i = 0; i < 3; i++) BuildCard(c, i);
+        for (int i = 0; i < Order.Length; i++) BuildCard(c, i);
 
         TextMeshProUGUI foot = NbUi.Text("Foot", c,
-            "CLICK  A  CARD   /   PRESS  1  2  3", 18f,
+            "CLICK  A  CARD   /   PRESS  1  2", 18f,
             new Color(1f, 1f, 1f, 0.40f), TextAlignmentOptions.Center);
         Center(foot.rectTransform, new Vector2(0f, -352f), new Vector2(900f, 30f));
 
-        Debug.Log("[Nb] 场景选择页就位：街区 / 后院 / 冰箱，自由选择。");
+        Debug.Log("[Nb] 场景选择页就位：街区 / 冰箱，自由选择。");
     }
 
     void BuildCard(Transform c, int i)
     {
         RectTransform card = NbUi.Rect("Card " + i, c);
-        Center(card, new Vector2(-540f + i * 540f, -20f), new Vector2(480f, 470f));
+        Center(card, new Vector2(-270f + i * 540f, -20f), new Vector2(480f, 470f));
         _cards[i] = card;
 
         Image bg = card.gameObject.AddComponent<Image>();
@@ -184,7 +181,7 @@ internal class NbSceneSelect : MonoBehaviour
         ri.raycastTarget = false;
 
         int best = NbProgress.Best(Order[i]);
-        string prog = best >= NbLevels.Count ? "ALL  TEN  CLEARED" : "BEST  LEVEL  " + best;
+        string prog = best >= NbLevels.Count ? "ALL  THREE  CLEARED" : "BEST  LEVEL  " + best;
         TextMeshProUGUI pr = NbUi.Text("Prog", card, prog, 20f,
             new Color(Accent[i].r, Accent[i].g, Accent[i].b, 0.92f), TextAlignmentOptions.Center);
         Center(pr.rectTransform, new Vector2(0f, -92f), new Vector2(420f, 30f));
@@ -233,7 +230,6 @@ internal class NbSceneSelect : MonoBehaviour
         {
             if (kb.digit1Key.wasPressedThisFrame) { Pick(0); return; }
             if (kb.digit2Key.wasPressedThisFrame) { Pick(1); return; }
-            if (kb.digit3Key.wasPressedThisFrame) { Pick(2); return; }
         }
     }
 

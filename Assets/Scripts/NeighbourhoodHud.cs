@@ -1,4 +1,4 @@
-// @role In-game HUD: cheese count, toasts, health pips, exposure/rot/door meters, win/fail overlay.
+// @role In-game HUD: cheese count, toasts, health pips, exposure/rot/door meters, win/fail overlay, proximity danger edge glow.
 // @calls NbGame NbScene NbLevels NbUi NbFridge
 
 // NeighbourhoodHud.cs — 左上角奶酪计数 + 提示条 + 成功面板 + 被抓红闪
@@ -14,7 +14,7 @@ using UnityEngine.UI;
 /// 造 UI 用的小工具箱（地图面板也用这里的）
 internal static class NbUi
 {
-    static Sprite _white, _round, _tri;
+    static Sprite _white, _round, _tri, _vig;
     static TMP_FontAsset _font;
     static bool _fontTried;
 
@@ -53,6 +53,16 @@ internal static class NbUi
         {
             if (_tri == null) _tri = MakeTriangle(64);
             return _tri;
+        }
+    }
+
+    /// 屏幕边缘发光用的径向渐变：中心透明、越靠边越亮。危险度只是乘在上面的颜色和透明度。
+    internal static Sprite Vignette
+    {
+        get
+        {
+            if (_vig == null) _vig = MakeVignette(256, 0.62f, 1.0f);
+            return _vig;
         }
     }
 
@@ -174,6 +184,36 @@ internal static class NbUi
         s.hideFlags = HideFlags.HideAndDontSave;
         return s;
     }
+
+    /// 径向渐变：alpha 从中心 0 平滑长到四角 1，中间那段由 inner…outer 控制过渡位置。
+    /// 用 (r)^2 让中心大片保持透明，只有真正的屏幕边缘才亮 —— 要的就是"四周发亮"而不是整屏蒙一层。
+    static Sprite MakeVignette(int size, float inner, float outer)
+    {
+        Texture2D t = new Texture2D(size, size, TextureFormat.RGBA32, false);
+        t.wrapMode = TextureWrapMode.Clamp;
+        t.filterMode = FilterMode.Bilinear;
+        Color[] px = new Color[size * size];
+        float c = (size - 1) * 0.5f;
+        float span = Mathf.Max(0.01f, outer - inner);
+        for (int y = 0; y < size; y++)
+        {
+            for (int x = 0; x < size; x++)
+            {
+                float dx = (x - c) / c;
+                float dy = (y - c) / c;
+                float r = Mathf.Sqrt(dx * dx + dy * dy);   // 0 中心 → ~1.41 角
+                float a = Mathf.Clamp01((r - inner) / span);
+                a *= a;
+                px[y * size + x] = new Color(1f, 1f, 1f, a);
+            }
+        }
+        t.SetPixels(px);
+        t.Apply();
+        t.hideFlags = HideFlags.HideAndDontSave;
+        Sprite s = Sprite.Create(t, new Rect(0f, 0f, size, size), new Vector2(0.5f, 0.5f));
+        s.hideFlags = HideFlags.HideAndDontSave;
+        return s;
+    }
 }
 
 internal class NbHud : MonoBehaviour
@@ -184,6 +224,8 @@ internal class NbHud : MonoBehaviour
     static readonly Color Gold = new Color(1.00f, 0.86f, 0.36f, 1f);
     static readonly Color Dim = new Color(0.86f, 0.82f, 0.74f, 1f);
     static readonly Color Panel = new Color(0.10f, 0.09f, 0.08f, 0.62f);
+    static readonly Color ThreatFar = new Color(1.00f, 1.00f, 1.00f, 1f);
+    static readonly Color ThreatRed = new Color(0.95f, 0.24f, 0.18f, 1f);
 
     TextMeshProUGUI _level;
     TextMeshProUGUI _count;
@@ -200,6 +242,7 @@ internal class NbHud : MonoBehaviour
     readonly Image[] _hpSegs = new Image[NbLevels.StartHp / NbLevels.BiteDamage];
 
     Image _flash;
+    Image _danger;   // 敌人逼近时屏幕边缘发光（白 → 红）
 
     GameObject _endRoot;
     TextMeshProUGUI _endTitle;
@@ -260,6 +303,17 @@ internal class NbHud : MonoBehaviour
 
         Transform c = canvasGo.transform;
 
+        // ── 敌人逼近：屏幕边缘发光（最底层，比红闪还靠下）──
+        RectTransform dangerRt = NbUi.Rect("Danger", c);
+        dangerRt.anchorMin = Vector2.zero;
+        dangerRt.anchorMax = Vector2.one;
+        dangerRt.offsetMin = Vector2.zero;
+        dangerRt.offsetMax = Vector2.zero;
+        _danger = dangerRt.gameObject.AddComponent<Image>();
+        _danger.sprite = NbUi.Vignette;
+        _danger.color = new Color(ThreatFar.r, ThreatFar.g, ThreatFar.b, 0f);
+        _danger.raycastTarget = false;
+
         // ── 被抓时全屏红闪（最底层）──
         RectTransform flashRt = NbUi.Rect("Flash", c);
         flashRt.anchorMin = Vector2.zero;
@@ -288,7 +342,7 @@ internal class NbHud : MonoBehaviour
         bg.color = Panel;
         bg.raycastTarget = false;
 
-        _level = NbUi.Text("Level", card, "LEVEL  1 / 10", 24f, Gold, TextAlignmentOptions.TopLeft);
+        _level = NbUi.Text("Level", card, "LEVEL  1 / 3", 24f, Gold, TextAlignmentOptions.TopLeft);
         Place(_level.rectTransform, new Vector2(22f, -12f), new Vector2(280f, 30f));
 
         TextMeshProUGUI label = NbUi.Text("Label", card, "CHEESE", 22f, Dim, TextAlignmentOptions.TopLeft);
@@ -359,7 +413,7 @@ internal class NbHud : MonoBehaviour
 
         // ── 操作提示（左下角）──
         // 宽度压到 620：旧版 1040 会横穿屏幕中央，被曝光条压住一半。
-        TextMeshProUGUI hint = NbUi.Text("Hint", c, "WASD - MOVE     SHIFT - RUN     SPACE - JUMP     Q/E - TURN     ENTER - MAIN MENU", 18f,
+        TextMeshProUGUI hint = NbUi.Text("Hint", c, "WASD - MOVE     SHIFT - RUN     SPACE - JUMP     Q/E - TURN     R - SMELL     ENTER - MAIN MENU", 18f,
             new Color(1f, 1f, 1f, 0.42f), TextAlignmentOptions.BottomLeft);
         RectTransform hr = hint.rectTransform;
         hr.anchorMin = hr.anchorMax = hr.pivot = new Vector2(0f, 0f);
@@ -585,6 +639,16 @@ internal class NbHud : MonoBehaviour
         {
             float a = Mathf.Clamp01(g.Flash) * 0.42f;
             _flash.color = new Color(0.75f, 0.08f, 0.06f, a);
+        }
+
+        // 敌人逼近：边缘发光。危险度越高越亮、越红 —— 远看是白光，贴脸时变成血红色。
+        // 结算面板出现后立刻收掉：那时敌人已经不在追了，边缘光没有意义。
+        if (_danger != null)
+        {
+            float t = g.Finished ? 0f : Mathf.Clamp01(g.Threat);
+            Color c = Color.Lerp(ThreatFar, ThreatRed, t);
+            c.a = t * 0.22f;
+            _danger.color = c;
         }
 
         // 被追的时候这条会**呼吸**：静止的红字在余光里会被当成 HUD 的一部分，闪的不会。
